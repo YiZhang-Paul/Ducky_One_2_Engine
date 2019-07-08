@@ -13,9 +13,21 @@ namespace DuckyOne2EngineTest.UnitTests
     public class ColorControlTest
     {
         private Tuple<string, byte[]>[] _colors;
+        private BytePosition[][] _positions;
         private Mock<IHidDevice> _device;
         private Mock<IKeyColorMapper> _mapper;
         private ColorControl _control;
+
+        private void SetupDevice(StringBuilder builder)
+        {
+            _device.Setup(x => x.Write(It.IsAny<byte[]>()))
+                .Callback((byte[] input) =>
+                {
+                    var hex = input.Select(_ => _.ToString("X2"));
+                    builder.Append($" {string.Join(" ", hex)}");
+                })
+                .Returns(true);
+        }
 
         [TestInitialize]
         public void Setup()
@@ -25,6 +37,28 @@ namespace DuckyOne2EngineTest.UnitTests
                 new Tuple<string, byte[]>("G", new byte[] {0, 0, 255}),
                 new Tuple<string, byte[]>("5", new byte[] {255, 255, 0}),
                 new Tuple<string, byte[]>("SPACE", new byte[] {255, 0, 255})
+            };
+
+            _positions = new[]
+            {
+                new[]
+                {
+                    new BytePosition(1, 64),
+                    new BytePosition(2, 5),
+                    new BytePosition(2, 6)
+                },
+                new[]
+                {
+                    new BytePosition(1, 58),
+                    new BytePosition(1, 59),
+                    new BytePosition(1, 60)
+                },
+                new[]
+                {
+                    new BytePosition(2, 28),
+                    new BytePosition(2, 29),
+                    new BytePosition(2, 30)
+                }
             };
 
             _device = new Mock<IHidDevice>();
@@ -43,9 +77,6 @@ namespace DuckyOne2EngineTest.UnitTests
         [TestMethod]
         public void SetColorShouldSetColorOnReport()
         {
-            var color = _colors[1];
-            var bytes = new StringBuilder();
-
             var expected = new []
             {
                 "00 56 81 00 00 01 00 00 00 07 00 00 00 AA AA AA AA 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00",
@@ -59,21 +90,10 @@ namespace DuckyOne2EngineTest.UnitTests
                 "00 51 28 00 00 FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
             };
 
-            _mapper.Setup(x => x.GetBytePositions(color.Item1))
-                .Returns(new []
-                {
-                    new BytePosition(1, 58),
-                    new BytePosition(1, 59),
-                    new BytePosition(1, 60)
-                });
-
-            _device.Setup(x => x.Write(It.IsAny<byte[]>()))
-                .Callback((byte[] input) =>
-                {
-                    var hex = input.Select(_ => _.ToString("X2"));
-                    bytes.Append($" {string.Join(" ", hex)}");
-                })
-                .Returns(true);
+            var color = _colors[1];
+            var bytes = new StringBuilder();
+            SetupDevice(bytes);
+            _mapper.Setup(x => x.GetBytePositions(color.Item1)).Returns(_positions[1]);
 
             _control.SetColor(color);
             _control.ApplyColors();
@@ -92,8 +112,6 @@ namespace DuckyOne2EngineTest.UnitTests
         [TestMethod]
         public void SetColorsShouldSetColorsOnReport()
         {
-            var bytes = new StringBuilder();
-
             var expected = new[]
             {
                 "00 56 81 00 00 01 00 00 00 07 00 00 00 AA AA AA AA 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00",
@@ -107,33 +125,13 @@ namespace DuckyOne2EngineTest.UnitTests
                 "00 51 28 00 00 FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
             };
 
-            _mapper.SetupSequence(x => x.GetBytePositions(It.IsAny<string>()))
-                .Returns(new[]
-                {
-                    new BytePosition(1, 64),
-                    new BytePosition(2, 5),
-                    new BytePosition(2, 6)
-                })
-                .Returns(new[]
-                {
-                    new BytePosition(1, 58),
-                    new BytePosition(1, 59),
-                    new BytePosition(1, 60)
-                })
-                .Returns(new[]
-                {
-                    new BytePosition(2, 28),
-                    new BytePosition(2, 29),
-                    new BytePosition(2, 30)
-                });
+            var bytes = new StringBuilder();
+            SetupDevice(bytes);
 
-            _device.Setup(x => x.Write(It.IsAny<byte[]>()))
-                .Callback((byte[] input) =>
-                {
-                    var hex = input.Select(_ => _.ToString("X2"));
-                    bytes.Append($" {string.Join(" ", hex)}");
-                })
-                .Returns(true);
+            _mapper.SetupSequence(x => x.GetBytePositions(It.IsAny<string>()))
+                .Returns(_positions[0])
+                .Returns(_positions[1])
+                .Returns(_positions[2]);
 
             _control.SetColors(_colors);
             _control.ApplyColors();
@@ -152,8 +150,6 @@ namespace DuckyOne2EngineTest.UnitTests
         [TestMethod]
         public void ApplyColorsShouldSendBlankReportOnDefault()
         {
-            var bytes = new StringBuilder();
-
             var expected = new[]
             {
                 "00 56 81 00 00 01 00 00 00 07 00 00 00 AA AA AA AA 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00",
@@ -167,13 +163,8 @@ namespace DuckyOne2EngineTest.UnitTests
                 "00 51 28 00 00 FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
             };
 
-            _device.Setup(x => x.Write(It.IsAny<byte[]>()))
-                .Callback((byte[] input) =>
-                {
-                    var hex = input.Select(_ => _.ToString("X2"));
-                    bytes.Append($" {string.Join(" ", hex)}");
-                })
-                .Returns(true);
+            var bytes = new StringBuilder();
+            SetupDevice(bytes);
             
             _control.ApplyColors();
 
