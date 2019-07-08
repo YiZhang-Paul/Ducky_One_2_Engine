@@ -9,59 +9,48 @@ namespace UsbReportParser
     {
         public IEnumerable<string> GetInput(string rawReport)
         {
-            var input = new List<string>();
-            var lines = SplitToLines(rawReport);
-
-            for (int i = 0; i < lines.Length; ++i)
-            {
-                if (Regex.IsMatch(lines[i], @"Input Report"))
-                {
-                    var report = new StringBuilder();
-
-                    for (int j = 0; j < 4; ++j)
-                    {
-                        if (++i < lines.Length)
-                        {
-                            report.Append($" {ExtractBytes(lines[i])}");
-                        }
-                    }
-
-                    input.Add(report.ToString().Trim());
-                }
-            }
-
-            return input;
+            return GetReports(rawReport, @"Input Report");
         }
 
         public IEnumerable<string> GetOutput(string rawReport)
         {
-            var output = new List<string>();
+            return GetReports(rawReport, @"Output Report");
+        }
+
+        private IEnumerable<string> GetReports(string rawReport, string pattern)
+        {
+            var reports = new List<string>();
             var lines = SplitToLines(rawReport);
 
             for (int i = 0; i < lines.Length; ++i)
             {
-                if (Regex.IsMatch(lines[i], @"Output Report"))
+                if (Regex.IsMatch(lines[i], pattern))
                 {
-                    var report = new StringBuilder();
-
-                    for (int j = 0; j < 4; ++j)
-                    {
-                        if (++i < lines.Length)
-                        {
-                            report.Append($" {ExtractBytes(lines[i])}");
-                        }
-                    }
-
-                    output.Add(report.ToString().Trim());
+                    reports.Add(ExtractAllBytes(lines, ref i));
                 }
             }
 
-            return output;
+            return reports;
         }
 
         private string[] SplitToLines(string rawReport)
         {
             return rawReport.Split('\n').Select(_ => _.Trim()).ToArray();
+        }
+
+        private string ExtractAllBytes(string[] lines, ref int index)
+        {
+            var bytes = new StringBuilder();
+
+            for (int i = 0; i < 4; ++i)
+            {
+                if (++index < lines.Length)
+                {
+                    bytes.Append($" {ExtractBytes(lines[index])}");
+                }
+            }
+
+            return bytes.ToString().Trim();
         }
 
         private string ExtractBytes(string rawData)
