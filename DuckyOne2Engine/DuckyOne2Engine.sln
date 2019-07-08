@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.28307.106
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DuckyOne2Engine", "DuckyOne2Engine\DuckyOne2Engine.csproj", "{D38071B0-2987-4FB3-9D9E-2392F6955DFF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsbReportParser", "UsbReportParser\UsbReportParser.csproj", "{04B8F9B5-E6A2-4CC4-98FF-B357E4139075}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsbReportParserTest", "UsbReportParserTest\UsbReportParserTest.csproj", "{BDB3E899-8FCF-4338-895A-F256D4DDEFB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{D38071B0-2987-4FB3-9D9E-2392F6955DFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D38071B0-2987-4FB3-9D9E-2392F6955DFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D38071B0-2987-4FB3-9D9E-2392F6955DFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04B8F9B5-E6A2-4CC4-98FF-B357E4139075}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04B8F9B5-E6A2-4CC4-98FF-B357E4139075}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04B8F9B5-E6A2-4CC4-98FF-B357E4139075}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04B8F9B5-E6A2-4CC4-98FF-B357E4139075}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDB3E899-8FCF-4338-895A-F256D4DDEFB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDB3E899-8FCF-4338-895A-F256D4DDEFB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDB3E899-8FCF-4338-895A-F256D4DDEFB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDB3E899-8FCF-4338-895A-F256D4DDEFB8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
