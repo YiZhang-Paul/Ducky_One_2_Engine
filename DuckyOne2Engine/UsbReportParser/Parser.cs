@@ -21,6 +21,7 @@ namespace UsbReportParser
         {
             var reports = new List<string>();
             var lines = SplitToLines(rawReport);
+            var result = new List<string>();
 
             for (int i = 0; i < lines.Length; ++i)
             {
@@ -30,7 +31,15 @@ namespace UsbReportParser
                 }
             }
 
-            return reports;
+            for (int i = 0; i < reports.Count; ++i)
+            {
+                if (i % 4 == 0)
+                {
+                    result.Add(reports[i]);
+                }
+            }
+
+            return result;
         }
 
         private string[] SplitToLines(string rawReport)
