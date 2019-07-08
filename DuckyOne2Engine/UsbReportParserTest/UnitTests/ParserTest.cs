@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 using UsbReportParser;
 
 namespace UsbReportParserTest.UnitTests
@@ -62,6 +62,20 @@ namespace UsbReportParserTest.UnitTests
         public void Setup()
         {
             _parser = new Parser();
+        }
+
+        [TestMethod]
+        public void GetInputShouldReturnParsedUsbInput()
+        {
+            var expected = new[]
+            {
+                "56 83 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00",
+                "56 83 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+            };
+
+            var input = _parser.GetInput(RawData);
+
+            CollectionAssert.AreEqual(expected, input.ToArray());
         }
 
         [TestMethod]
