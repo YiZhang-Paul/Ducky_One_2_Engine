@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UsbReportParser;
 
 namespace UsbReportParserTest.UnitTests
@@ -76,7 +77,7 @@ namespace UsbReportParserTest.UnitTests
 
             var output = _parser.GetOutput(RawData);
 
-            CollectionAssert.AreEqual(expected, output);
+            CollectionAssert.AreEqual(expected, output.ToArray());
         }
     }
 }
