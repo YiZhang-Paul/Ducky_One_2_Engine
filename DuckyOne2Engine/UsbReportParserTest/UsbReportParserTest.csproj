@@ -56,11 +56,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="test_data.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\UsbReportParser\UsbReportParser.csproj">
       <Project>{04b8f9b5-e6a2-4cc4-98ff-b357e4139075}</Project>
       <Name>UsbReportParser</Name>
