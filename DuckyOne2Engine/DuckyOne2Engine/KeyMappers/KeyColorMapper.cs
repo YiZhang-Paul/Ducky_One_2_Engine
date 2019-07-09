@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DuckyOne2Engine.KeyColors
+namespace DuckyOne2Engine.KeyMappers
 {
     public class KeyColorMapper : IKeyColorMapper
     {

@@ -6,6 +6,7 @@ using Moq;
 using System;
 using System.Linq;
 using System.Text;
+using DuckyOne2Engine.KeyMappers;
 
 namespace DuckyOne2EngineTest.UnitTests
 {

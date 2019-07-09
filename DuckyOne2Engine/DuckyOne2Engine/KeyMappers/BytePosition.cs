@@ -1,4 +1,4 @@
-﻿namespace DuckyOne2Engine.KeyColors
+﻿namespace DuckyOne2Engine.KeyMappers
 {
     public class BytePosition
     {
