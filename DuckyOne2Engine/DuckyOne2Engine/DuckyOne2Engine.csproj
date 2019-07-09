@@ -47,9 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ColorControl.cs" />
-    <Compile Include="KeyColors\BytePosition.cs" />
-    <Compile Include="KeyColors\IKeyColorMapper.cs" />
-    <Compile Include="KeyColors\KeyColorMapper.cs" />
+    <Compile Include="KeyMappers\BytePosition.cs" />
+    <Compile Include="KeyMappers\IKeyColorMapper.cs" />
+    <Compile Include="KeyMappers\KeyColorMapper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -64,6 +64,7 @@
     <Content Include="Commands\open.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="mappings.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,12 +1,11 @@
 ﻿using DuckyOne2Engine;
-using DuckyOne2Engine.KeyColors;
+using DuckyOne2Engine.KeyMappers;
 using HidLibrary;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Linq;
 using System.Text;
-using DuckyOne2Engine.KeyMappers;
 
 namespace DuckyOne2EngineTest.UnitTests
 {

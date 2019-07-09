@@ -1,4 +1,4 @@
-﻿using DuckyOne2Engine.KeyColors;
+﻿using DuckyOne2Engine.KeyMappers;
 using HidLibrary;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿using DuckyOne2Engine.KeyColors;
+﻿using DuckyOne2Engine.KeyMappers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
