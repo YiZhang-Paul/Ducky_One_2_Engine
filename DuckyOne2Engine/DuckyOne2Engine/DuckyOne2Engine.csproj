@@ -52,6 +52,7 @@
     <Compile Include="KeyMappers\IKeyInputMapper.cs" />
     <Compile Include="KeyMappers\KeyColorMapper.cs" />
     <Compile Include="KeyMappers\KeyInputMapper.cs" />
+    <Compile Include="KeyMappers\Keys.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

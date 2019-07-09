@@ -12,7 +12,7 @@ namespace DuckyOne2EngineTest.UnitTests
     [TestClass]
     public class ColorControlTest
     {
-        private Tuple<string, byte[]>[] _colors;
+        private Tuple<Keys, byte[]>[] _colors;
         private BytePosition[][] _positions;
         private Mock<IHidDevice> _device;
         private Mock<IKeyColorMapper> _mapper;
@@ -34,9 +34,9 @@ namespace DuckyOne2EngineTest.UnitTests
         {
             _colors = new[]
             {
-                new Tuple<string, byte[]>("G", new byte[] {0, 0, 255}),
-                new Tuple<string, byte[]>("5", new byte[] {255, 255, 0}),
-                new Tuple<string, byte[]>("SPACE", new byte[] {255, 0, 255})
+                new Tuple<Keys, byte[]>(Keys.G, new byte[] {0, 0, 255}),
+                new Tuple<Keys, byte[]>(Keys.Five, new byte[] {255, 255, 0}),
+                new Tuple<Keys, byte[]>(Keys.Space, new byte[] {255, 0, 255})
             };
 
             _positions = new[]
@@ -128,7 +128,7 @@ namespace DuckyOne2EngineTest.UnitTests
             var bytes = new StringBuilder();
             SetupDevice(bytes);
 
-            _mapper.SetupSequence(x => x.GetBytePositions(It.IsAny<string>()))
+            _mapper.SetupSequence(x => x.GetBytePositions(It.IsAny<Keys>()))
                 .Returns(_positions[0])
                 .Returns(_positions[1])
                 .Returns(_positions[2]);

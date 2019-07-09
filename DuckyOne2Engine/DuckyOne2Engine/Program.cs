@@ -29,11 +29,11 @@ namespace DuckyOne2Engine
 
                 controller.SetColors(new[]
                 {
-                    new Tuple<string, byte[]>("ESC", new byte[] {0, 0, 255}),
-                    new Tuple<string, byte[]>("G", new byte[] {255, 0, 0}),
-                    new Tuple<string, byte[]>("SPACE", new byte[] {255, 0, 255}),
-                    new Tuple<string, byte[]>("G", new byte[] {255, 255, 0}),
-                    new Tuple<string, byte[]>("?", new byte[] {255, 255, 255})
+                    new Tuple<Keys, byte[]>(Keys.Esc, new byte[] {0, 0, 255}),
+                    new Tuple<Keys, byte[]>(Keys.G, new byte[] {255, 0, 0}),
+                    new Tuple<Keys, byte[]>(Keys.Space, new byte[] {255, 0, 255}),
+                    new Tuple<Keys, byte[]>(Keys.G, new byte[] {255, 255, 0}),
+                    new Tuple<Keys, byte[]>(Keys.Question, new byte[] {255, 255, 255})
                 });
 
                 controller.ApplyColors();
