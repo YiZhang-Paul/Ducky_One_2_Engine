@@ -1,4 +1,4 @@
-﻿namespace DuckyOne2Engine.ColorControl
+﻿namespace DuckyOne2Engine.ColorControls
 {
     public class KeyColor
     {

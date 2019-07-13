@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DuckyOne2Engine.ColorControl
+namespace DuckyOne2Engine.ColorControls
 {
     public class ColorControl : IColorControl
     {

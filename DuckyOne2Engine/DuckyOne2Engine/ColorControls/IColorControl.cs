@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DuckyOne2Engine.ColorControl
+namespace DuckyOne2Engine.ColorControls
 {
     public interface IColorControl
     {
