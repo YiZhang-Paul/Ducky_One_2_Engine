@@ -57,6 +57,14 @@ namespace DuckyOne2Engine
             }
         }
 
+        public void SetAll(byte[] color)
+        {
+            foreach (var key in Enum.GetValues(typeof(Keys)).Cast<Keys>())
+            {
+                SetColor(new Tuple<Keys, byte[]>(key, color));
+            }
+        }
+
         public void ApplyColors()
         {
             foreach (var input in CurrentReport)

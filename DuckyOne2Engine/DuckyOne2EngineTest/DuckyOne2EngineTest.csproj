@@ -65,6 +65,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IntegrationTests\ColorControlTest.cs" />
+    <Compile Include="Mocks\MockDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitTests\KeyColorMapperTest.cs" />
     <Compile Include="UnitTests\ColorControlTest.cs" />

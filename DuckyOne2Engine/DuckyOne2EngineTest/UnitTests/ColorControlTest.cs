@@ -1,11 +1,10 @@
 ﻿using DuckyOne2Engine;
 using DuckyOne2Engine.KeyMappers;
+using DuckyOne2EngineTest.Mocks;
 using HidLibrary;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
-using System.Linq;
-using System.Text;
 
 namespace DuckyOne2EngineTest.UnitTests
 {
@@ -17,17 +16,6 @@ namespace DuckyOne2EngineTest.UnitTests
         private Mock<IHidDevice> _device;
         private Mock<IKeyColorMapper> _mapper;
         private ColorControl _control;
-
-        private void SetupDevice(StringBuilder builder)
-        {
-            _device.Setup(x => x.Write(It.IsAny<byte[]>()))
-                .Callback((byte[] input) =>
-                {
-                    var hex = input.Select(_ => _.ToString("X2"));
-                    builder.Append($" {string.Join(" ", hex)}");
-                })
-                .Returns(true);
-        }
 
         [TestInitialize]
         public void Setup()
@@ -91,8 +79,7 @@ namespace DuckyOne2EngineTest.UnitTests
             };
 
             var color = _colors[1];
-            var bytes = new StringBuilder();
-            SetupDevice(bytes);
+            var bytes = MockDevice.SetupWrite(_device);
             _mapper.Setup(x => x.GetBytePositions(color.Item1)).Returns(_positions[1]);
 
             _control.SetColor(color);
@@ -125,8 +112,7 @@ namespace DuckyOne2EngineTest.UnitTests
                 "00 51 28 00 00 FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
             };
 
-            var bytes = new StringBuilder();
-            SetupDevice(bytes);
+            var bytes = MockDevice.SetupWrite(_device);
 
             _mapper.SetupSequence(x => x.GetBytePositions(It.IsAny<Keys>()))
                 .Returns(_positions[0])
@@ -163,9 +149,8 @@ namespace DuckyOne2EngineTest.UnitTests
                 "00 51 28 00 00 FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
             };
 
-            var bytes = new StringBuilder();
-            SetupDevice(bytes);
-            
+            var bytes = MockDevice.SetupWrite(_device);
+
             _control.ApplyColors();
 
             Assert.AreEqual(string.Join(" ", expected), bytes.ToString().Trim());
