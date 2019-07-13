@@ -32,7 +32,7 @@ namespace DuckyOne2Engine
             CurrentReport = BlankReport;
         }
 
-        public void SetColor(Tuple<Keys, byte[]> color)
+        public void SetColor(Tuple<string, byte[]> color)
         {
             var positions = Mapper.GetBytePositions(color.Item1).ToArray();
 
@@ -49,7 +49,7 @@ namespace DuckyOne2Engine
             }
         }
 
-        public void SetColors(IEnumerable<Tuple<Keys, byte[]>> colors)
+        public void SetColors(IEnumerable<Tuple<string, byte[]>> colors)
         {
             foreach (var color in colors)
             {
@@ -59,9 +59,9 @@ namespace DuckyOne2Engine
 
         public void SetAll(byte[] color)
         {
-            foreach (var key in Enum.GetValues(typeof(Keys)).Cast<Keys>())
+            foreach (var key in Keys.AllKeys)
             {
-                SetColor(new Tuple<Keys, byte[]>(key, color));
+                SetColor(new Tuple<string, byte[]>(key, color));
             }
         }
 

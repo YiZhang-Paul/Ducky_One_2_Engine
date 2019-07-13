@@ -4,11 +4,11 @@ namespace DuckyOne2Engine.KeyMappers
 {
     public class KeyColorMapper : IKeyColorMapper
     {
-        private readonly Dictionary<Keys, BytePosition[]> _keyMap;
+        private readonly Dictionary<string, BytePosition[]> _keyMap;
 
         public KeyColorMapper()
         {
-            _keyMap = new Dictionary<Keys, BytePosition[]>();
+            _keyMap = new Dictionary<string, BytePosition[]>();
             SetBytePositions(Keys.Esc, 0, 25);
             SetBytePositions(Keys.Backtick, 0, 28);
             SetBytePositions(Keys.Tab, 0, 31);
@@ -98,7 +98,7 @@ namespace DuckyOne2Engine.KeyMappers
             SetBytePositions(Keys.Rarrow, 5, 46);
         }
 
-        public IEnumerable<BytePosition> GetBytePositions(Keys key)
+        public IEnumerable<BytePosition> GetBytePositions(string key)
         {
             if (!_keyMap.ContainsKey(key))
             {
@@ -108,7 +108,7 @@ namespace DuckyOne2Engine.KeyMappers
             return _keyMap[key];
         }
 
-        private void SetBytePositions(Keys key, int row, int index)
+        private void SetBytePositions(string key, int row, int index)
         {
             var positions = new BytePosition[3];
 

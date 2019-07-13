@@ -9,7 +9,7 @@ namespace DuckyOne2EngineTest.UnitTests
     {
         private KeyColorMapper _mapper;
 
-        private string GetBytePositionsString(Keys key)
+        private string GetBytePositionsString(string key)
         {
             var positions = _mapper.GetBytePositions(key);
 

@@ -4,6 +4,6 @@ namespace DuckyOne2Engine.KeyMappers
 {
     public interface IKeyColorMapper
     {
-        IEnumerable<BytePosition> GetBytePositions(Keys key);
+        IEnumerable<BytePosition> GetBytePositions(string key);
     }
 }
