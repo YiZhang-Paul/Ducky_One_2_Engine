@@ -48,6 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ColorControl\ColorControl.cs" />
+    <Compile Include="ColorControl\IColorControl.cs" />
+    <Compile Include="ColorControl\KeyColor.cs" />
     <Compile Include="HidDevices\HidDevice.cs" />
     <Compile Include="HidDevices\IHidDevice.cs" />
     <Compile Include="HidDevices\InterfaceDetails.cs" />

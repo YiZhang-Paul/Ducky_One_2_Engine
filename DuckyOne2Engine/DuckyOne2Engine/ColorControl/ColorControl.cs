@@ -32,26 +32,28 @@ namespace DuckyOne2Engine.ColorControl
             CurrentReport = BlankReport;
         }
 
-        public bool SetColor(Tuple<string, byte[]> color)
+        public bool SetColor(KeyColor color)
         {
-            var positions = Mapper.GetBytePositions(color.Item1).ToArray();
+            var positions = Mapper.GetBytePositions(color.Key).ToArray();
 
             if (!positions.Any())
             {
                 return false;
             }
 
-            for (int i = 0; i < positions.Length; ++i)
+            void SetRgb(BytePosition position, byte value)
             {
-                var row = positions[i].Row + 1;
-                var index = positions[i].Index;
-                CurrentReport[row][index] = color.Item2[i];
+                CurrentReport[position.Row + 1][position.Index] = value;
             }
+
+            SetRgb(positions[0], color.R);
+            SetRgb(positions[1], color.G);
+            SetRgb(positions[2], color.B);
 
             return true;
         }
 
-        public bool SetColors(IEnumerable<Tuple<string, byte[]>> colors)
+        public bool SetColors(IEnumerable<KeyColor> colors)
         {
             bool result = true;
 
@@ -67,7 +69,7 @@ namespace DuckyOne2Engine.ColorControl
         {
             foreach (var key in Keys.AllKeys)
             {
-                SetColor(new Tuple<string, byte[]>(key, color));
+                SetColor(new KeyColor(key, color));
             }
         }
 

@@ -4,14 +4,13 @@ using DuckyOne2Engine.KeyMappers;
 using DuckyOne2EngineTest.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System;
 
 namespace DuckyOne2EngineTest.UnitTests
 {
     [TestClass]
     public class ColorControlTest
     {
-        private Tuple<string, byte[]>[] _colors;
+        private KeyColor[] _colors;
         private BytePosition[][] _positions;
         private Mock<IHidDevice> _device;
         private Mock<IKeyColorMapper> _mapper;
@@ -22,9 +21,9 @@ namespace DuckyOne2EngineTest.UnitTests
         {
             _colors = new[]
             {
-                new Tuple<string, byte[]>(Keys.G, new byte[] {0, 0, 255}),
-                new Tuple<string, byte[]>(Keys.Five, new byte[] {255, 255, 0}),
-                new Tuple<string, byte[]>(Keys.Space, new byte[] {255, 0, 255})
+                new KeyColor(Keys.G, new byte[] {0, 0, 255}),
+                new KeyColor(Keys.Five, new byte[] {255, 255, 0}),
+                new KeyColor(Keys.Space, new byte[] {255, 0, 255})
             };
 
             _positions = new[]
@@ -80,7 +79,7 @@ namespace DuckyOne2EngineTest.UnitTests
 
             var color = _colors[1];
             var bytes = MockDevice.SetupWrite(_device);
-            _mapper.Setup(x => x.GetBytePositions(color.Item1)).Returns(_positions[1]);
+            _mapper.Setup(x => x.GetBytePositions(color.Key)).Returns(_positions[1]);
 
             _control.SetColor(color);
             _control.ApplyColors();
