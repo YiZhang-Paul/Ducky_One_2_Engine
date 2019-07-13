@@ -68,7 +68,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitTests\KeyColorMapperTest.cs" />
     <Compile Include="UnitTests\ColorControlTest.cs" />
-    <Compile Include="UnitTests\KeyInputMapperTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
