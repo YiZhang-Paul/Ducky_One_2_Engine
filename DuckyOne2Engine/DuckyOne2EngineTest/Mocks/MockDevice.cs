@@ -1,4 +1,4 @@
-﻿using HidLibrary;
+﻿using DuckyOne2Engine.HidDevices;
 using Moq;
 using System.Linq;
 using System.Text;
@@ -16,8 +16,7 @@ namespace DuckyOne2EngineTest.Mocks
                 {
                     var hex = input.Select(_ => _.ToString("X2"));
                     builder.Append($" {string.Join(" ", hex)}");
-                })
-                .Returns(true);
+                });
 
             return builder;
         }
