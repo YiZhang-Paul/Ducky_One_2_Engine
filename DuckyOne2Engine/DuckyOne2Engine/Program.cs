@@ -12,6 +12,7 @@ namespace DuckyOne2Engine
     class Program
     {
         private static DuckyDevice _duckyDevice;
+        private static IHidDevice _device;
 
         static void Main(string[] args)
         {
@@ -21,19 +22,21 @@ namespace DuckyOne2Engine
 
             if (path?.Length > 0)
             {
-                var device = new HidDevice(path, false);
-                var controller = new ColorControl(device, new KeyColorMapper());
+                _device = new HidDevice(path, false);
                 var backRgb = new byte[] { 1, 28, 73 };
                 var activeRgb = new byte[] { 255, 255, 255 };
-                _duckyDevice = new DuckyDevice(device, Exit);
-                _duckyDevice.UseMode(new ReactiveMode(controller, backRgb, activeRgb));
+                var controller = new ColorControl(_device, new KeyColorMapper());
+                var mode = new ReactiveMode(controller, backRgb, activeRgb);
+                _duckyDevice = new DuckyDevice(_device, Exit);
+                _duckyDevice.UseMode(mode);
                 Application.Run(new ApplicationContext());
             }
         }
 
         private static void Exit()
         {
-            _duckyDevice.Close();
+            _duckyDevice?.Close();
+            _device?.Close();
             Application.Exit();
         }
     }
