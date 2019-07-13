@@ -2,6 +2,7 @@
 using DuckyOne2Engine.KeyMappers;
 using Gma.System.MouseKeyHook;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -21,54 +22,46 @@ namespace DuckyOne2Engine
             if (path?.Length > 0)
             {
                 var device = new HidDevice(path, false);
-                var controller = new ColorControl(device, new KeyColorMapper());
                 SendCommandFromFile(device, "Commands/open.txt");
                 Thread.Sleep(1500);
-                controller.SetAll(new byte[] { 0x00, 0x00, 0x00 });
-                controller.ApplyColors();
-                ListenKeypress(controller);
+                SetupKeyboard(device);
                 Application.Run(new ApplicationContext());
             }
         }
 
-        static void ListenKeypress(ColorControl controller)
+        static void SendCommandFromFile(IHidDevice device, string name)
         {
+            foreach (var line in File.ReadAllLines(name))
+            {
+                var hex = line.Trim().Split(' ');
+                device.Write(hex.Select(_ => Convert.ToByte(_, 16)).ToArray());
+            }
+        }
+
+        static void SetupKeyboard(IHidDevice device)
+        {
+            var controller = new ColorControl(device, new KeyColorMapper());
+            controller.SetAll(new byte[] { 1, 28, 73 });
+            controller.ApplyColors();
+
+            Hook.GlobalEvents().OnCombination(new Dictionary<Combination, Action>
+            {
+                { Combination.FromString("Control+Shift+M"), () => Exit(device) }
+            });
+
             Hook.GlobalEvents().KeyDown += (sender, e) =>
             {
                 var key = e.KeyCode.ToString();
-                var color = new byte[] { 255, 255, 0 };
+                var color = new byte[] { 255, 255, 255 };
                 controller.SetColor(new Tuple<string, byte[]>(key, color));
                 controller.ApplyColors();
             };
         }
 
-        static void SendCommandFromFile(IHidDevice device, string name)
+        static void Exit(IHidDevice device)
         {
-            foreach (var input in ParseReports(name))
-            {
-                device.Write(input);
-            }
-        }
-
-        static byte[][] ParseReports(string name)
-        {
-            try
-            {
-                var lines = File.ReadAllLines(name);
-                var reports = new byte[lines.Length][];
-
-                for (int i = 0; i < lines.Length; ++i)
-                {
-                    var hex = lines[i].Trim().Split(' ');
-                    reports[i] = hex.Select(_ => Convert.ToByte(_, 16)).ToArray();
-                }
-
-                return reports;
-            }
-            catch
-            {
-                return new byte[0][];
-            }
+            SendCommandFromFile(device, "Commands/open.txt");
+            Application.Exit();
         }
     }
 }
