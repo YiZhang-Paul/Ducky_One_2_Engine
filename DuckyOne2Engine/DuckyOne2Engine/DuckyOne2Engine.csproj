@@ -47,7 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ColorControl.cs" />
+    <Compile Include="ColorControl\ColorControl.cs" />
     <Compile Include="HidDevices\HidDevice.cs" />
     <Compile Include="HidDevices\IHidDevice.cs" />
     <Compile Include="HidDevices\InterfaceDetails.cs" />

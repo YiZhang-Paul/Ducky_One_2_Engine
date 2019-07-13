@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DuckyOne2Engine
+namespace DuckyOne2Engine.ColorControl
 {
-    public class ColorControl
+    public class ColorControl : IColorControl
     {
         private IHidDevice Device { get; }
         private IKeyColorMapper Mapper { get; }
@@ -32,13 +32,13 @@ namespace DuckyOne2Engine
             CurrentReport = BlankReport;
         }
 
-        public void SetColor(Tuple<string, byte[]> color)
+        public bool SetColor(Tuple<string, byte[]> color)
         {
             var positions = Mapper.GetBytePositions(color.Item1).ToArray();
 
             if (!positions.Any())
             {
-                return;
+                return false;
             }
 
             for (int i = 0; i < positions.Length; ++i)
@@ -47,14 +47,20 @@ namespace DuckyOne2Engine
                 var index = positions[i].Index;
                 CurrentReport[row][index] = color.Item2[i];
             }
+
+            return true;
         }
 
-        public void SetColors(IEnumerable<Tuple<string, byte[]>> colors)
+        public bool SetColors(IEnumerable<Tuple<string, byte[]>> colors)
         {
+            bool result = true;
+
             foreach (var color in colors)
             {
-                SetColor(color);
+                result = result && SetColor(color);
             }
+
+            return result;
         }
 
         public void SetAll(byte[] color)

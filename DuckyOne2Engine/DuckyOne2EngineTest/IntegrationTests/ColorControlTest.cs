@@ -1,4 +1,4 @@
-﻿using DuckyOne2Engine;
+﻿using DuckyOne2Engine.ColorControl;
 using DuckyOne2Engine.HidDevices;
 using DuckyOne2Engine.KeyMappers;
 using DuckyOne2EngineTest.Mocks;
