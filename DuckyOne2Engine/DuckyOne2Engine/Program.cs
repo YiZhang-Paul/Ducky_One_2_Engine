@@ -1,89 +1,50 @@
-﻿using DuckyOne2Engine.KeyMappers;
+﻿using DuckyOne2Engine.HidDevices;
+using DuckyOne2Engine.KeyMappers;
 using Gma.System.MouseKeyHook;
-using HidLibrary;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
-using Keys = DuckyOne2Engine.KeyMappers.Keys;
 
 namespace DuckyOne2Engine
 {
     class Program
     {
-        private static IHidDevice _device;
-        private static ColorControl _controller;
-
         static void Main(string[] args)
         {
-            _device = FindDevice(0x04D9, 0x0356, "mi_01");
+            var name = "vid_04d9&pid_0356&mi_01";
+            var devices = HidDevice.GetConnectedDevices();
+            var path = devices.FirstOrDefault(_ => Regex.IsMatch(_.DevicePath, name)).DevicePath;
 
-            if (_device != null)
+            if (path?.Length > 0)
             {
-                _device.OpenDevice();
-                _controller = new ColorControl(_device, new KeyColorMapper());
-                _controller.SetAll(new byte[] { 0x00, 0x00, 0x00 });
-                _controller.ApplyColors();
-                ListenKeypress();
+                var device = new HidDevice(path, false);
+                var controller = new ColorControl(device, new KeyColorMapper());
+                SendCommandFromFile(device, "Commands/open.txt");
+                Thread.Sleep(1500);
+                controller.SetAll(new byte[] { 0x00, 0x00, 0x00 });
+                controller.ApplyColors();
+                ListenKeypress(controller);
                 Application.Run(new ApplicationContext());
             }
         }
 
-        static void ListenKeypress()
+        static void ListenKeypress(ColorControl controller)
         {
-            Hook.GlobalEvents().KeyPress += (sender, e) =>
+            Hook.GlobalEvents().KeyDown += (sender, e) =>
             {
-                var map = new Dictionary<char, Keys>
-                {
-                    {'a', Keys.A },
-                    {'b', Keys.B },
-                    {'c', Keys.C },
-                    {'d', Keys.D },
-                    {'e', Keys.E },
-                    {'f', Keys.F },
-                    {'g', Keys.G },
-                    {'h', Keys.H },
-                    {'i', Keys.I },
-                    {'j', Keys.J },
-                    {'k', Keys.K },
-                    {'l', Keys.L },
-                    {'m', Keys.M },
-                    {'n', Keys.N },
-                    {'o', Keys.O },
-                    {'p', Keys.P },
-                    {'q', Keys.Q },
-                    {'r', Keys.R },
-                    {'s', Keys.S },
-                    {'t', Keys.T },
-                    {'u', Keys.U },
-                    {'v', Keys.V },
-                    {'w', Keys.W },
-                    {'x', Keys.X },
-                    {'y', Keys.Y },
-                    {'z', Keys.Z }
-                };
-
-                var key = map.ContainsKey(e.KeyChar) ? map[e.KeyChar] : Keys.Backspace;
-                _controller.SetColor(new Tuple<Keys, byte[]>(key, new byte[] { 55, 55, 55 }));
-                _controller.ApplyColors();
+                var key = e.KeyCode.ToString();
+                var color = new byte[] { 255, 255, 0 };
+                controller.SetColor(new Tuple<string, byte[]>(key, color));
+                controller.ApplyColors();
             };
-        }
-
-        static IHidDevice FindDevice(int vendorId, int productId, string name)
-        {
-            var devices = HidDevices.Enumerate(vendorId, productId);
-
-            return devices.FirstOrDefault(_ => Regex.IsMatch(_.DevicePath, name));
         }
 
         static void SendCommandFromFile(IHidDevice device, string name)
         {
-            var reports = ParseReports(name);
-
-            foreach (var input in reports)
+            foreach (var input in ParseReports(name))
             {
                 device.Write(input);
             }
@@ -99,17 +60,13 @@ namespace DuckyOne2Engine
                 for (int i = 0; i < lines.Length; ++i)
                 {
                     var hex = lines[i].Trim().Split(' ');
-                    var bytes = hex.Select(_ => Convert.ToByte($"0x{_}", 16)).ToArray();
-                    reports[i] = new byte[bytes.Length + 1];
-                    Array.Copy(bytes, 0, reports[i], 1, bytes.Length);
+                    reports[i] = hex.Select(_ => Convert.ToByte(_, 16)).ToArray();
                 }
 
                 return reports;
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e);
-
                 return new byte[0][];
             }
         }
