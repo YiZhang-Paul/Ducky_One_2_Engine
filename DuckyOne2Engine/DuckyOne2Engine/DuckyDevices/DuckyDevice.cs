@@ -1,4 +1,5 @@
-﻿using DuckyOne2Engine.HidDevices;
+﻿using DuckyOne2Engine.DuckyDevices.ColorModes;
+using DuckyOne2Engine.HidDevices;
 using Gma.System.MouseKeyHook;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ namespace DuckyOne2Engine.DuckyDevices
     public class DuckyDevice
     {
         private IHidDevice Device { get; }
+        private IColorMode ColorMode { get; set; }
 
         public DuckyDevice(IHidDevice device, Action onExit)
         {
@@ -28,9 +30,16 @@ namespace DuckyOne2Engine.DuckyDevices
             });
         }
 
+        public void UseMode(IColorMode mode)
+        {
+            ColorMode?.Unload();
+            ColorMode = mode;
+            ColorMode.Setup();
+        }
+
         public void Open()
         {
-            SendCommandFromFile(Device, "../Commands/open.txt");
+            SendCommandFromFile(Device, "Commands/open.txt");
         }
 
         public void Close()

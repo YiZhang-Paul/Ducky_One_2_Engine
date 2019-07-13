@@ -47,9 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ColorControl\ColorControl.cs" />
-    <Compile Include="ColorControl\IColorControl.cs" />
-    <Compile Include="ColorControl\KeyColor.cs" />
+    <Compile Include="ColorControls\ColorControl.cs" />
+    <Compile Include="ColorControls\IColorControl.cs" />
+    <Compile Include="ColorControls\KeyColor.cs" />
+    <Compile Include="DuckyDevices\ColorModes\IColorMode.cs" />
+    <Compile Include="DuckyDevices\ColorModes\ReactiveMode.cs" />
+    <Compile Include="DuckyDevices\DuckyDevice.cs" />
     <Compile Include="HidDevices\HidDevice.cs" />
     <Compile Include="HidDevices\IHidDevice.cs" />
     <Compile Include="HidDevices\InterfaceDetails.cs" />
@@ -73,8 +76,6 @@
     </Content>
     <Content Include="mappings.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DuckyDevice\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
