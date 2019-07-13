@@ -1,49 +1,81 @@
 ﻿using DuckyOne2Engine.KeyMappers;
+using Gma.System.MouseKeyHook;
 using HidLibrary;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Windows.Forms;
+using Keys = DuckyOne2Engine.KeyMappers.Keys;
 
 namespace DuckyOne2Engine
 {
     class Program
     {
+        private static IHidDevice _device;
+        private static ColorControl _controller;
+
         static void Main(string[] args)
         {
-            var vendorId = 0x04D9;
-            var productId = 0x0356;
-            var devices = HidDevices.Enumerate(vendorId, productId);
+            _device = FindDevice(0x04D9, 0x0356, "mi_01");
 
-            using (var device = FindDevice(devices, "mi_01"))
+            if (_device != null)
             {
-                if (device == null)
-                {
-                    return;
-                }
-
-                SendCommandFromFile(device, "Commands/open.txt");
-                var mapper = new KeyColorMapper();
-                var controller = new ColorControl(device, mapper);
-
-                controller.SetColors(new[]
-                {
-                    new Tuple<Keys, byte[]>(Keys.Esc, new byte[] {0, 0, 255}),
-                    new Tuple<Keys, byte[]>(Keys.G, new byte[] {255, 0, 0}),
-                    new Tuple<Keys, byte[]>(Keys.Space, new byte[] {255, 0, 255}),
-                    new Tuple<Keys, byte[]>(Keys.G, new byte[] {255, 255, 0}),
-                    new Tuple<Keys, byte[]>(Keys.Question, new byte[] {255, 255, 255})
-                });
-
-                controller.ApplyColors();
-                Console.ReadKey();
-                SendCommandFromFile(device, "Commands/close.txt");
+                _device.OpenDevice();
+                _controller = new ColorControl(_device, new KeyColorMapper());
+                _controller.SetAll(new byte[] { 0x00, 0x00, 0x00 });
+                _controller.ApplyColors();
+                ListenKeypress();
+                Application.Run(new ApplicationContext());
             }
         }
 
-        static IHidDevice FindDevice(IEnumerable<IHidDevice> devices, string name)
+        static void ListenKeypress()
         {
+            Hook.GlobalEvents().KeyPress += (sender, e) =>
+            {
+                var map = new Dictionary<char, Keys>
+                {
+                    {'a', Keys.A },
+                    {'b', Keys.B },
+                    {'c', Keys.C },
+                    {'d', Keys.D },
+                    {'e', Keys.E },
+                    {'f', Keys.F },
+                    {'g', Keys.G },
+                    {'h', Keys.H },
+                    {'i', Keys.I },
+                    {'j', Keys.J },
+                    {'k', Keys.K },
+                    {'l', Keys.L },
+                    {'m', Keys.M },
+                    {'n', Keys.N },
+                    {'o', Keys.O },
+                    {'p', Keys.P },
+                    {'q', Keys.Q },
+                    {'r', Keys.R },
+                    {'s', Keys.S },
+                    {'t', Keys.T },
+                    {'u', Keys.U },
+                    {'v', Keys.V },
+                    {'w', Keys.W },
+                    {'x', Keys.X },
+                    {'y', Keys.Y },
+                    {'z', Keys.Z }
+                };
+
+                var key = map.ContainsKey(e.KeyChar) ? map[e.KeyChar] : Keys.Backspace;
+                _controller.SetColor(new Tuple<Keys, byte[]>(key, new byte[] { 55, 55, 55 }));
+                _controller.ApplyColors();
+            };
+        }
+
+        static IHidDevice FindDevice(int vendorId, int productId, string name)
+        {
+            var devices = HidDevices.Enumerate(vendorId, productId);
+
             return devices.FirstOrDefault(_ => Regex.IsMatch(_.DevicePath, name));
         }
 
