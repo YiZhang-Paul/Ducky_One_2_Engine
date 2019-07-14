@@ -27,33 +27,16 @@ namespace DuckyOne2Engine
                 return;
             }
 
+            var backRgb = new byte[] { 1, 28, 73 };
+            var activeRgb = new byte[] { 255, 255, 255 };
             var device = new HidDevice(path, false);
             var controller = new ColorControl(device, new KeyColorMapper());
-
-            // reactive mode
-            //var backRgb = new byte[] { 1, 28, 73 };
-            //var activeRgb = new byte[] { 255, 255, 255 };
-            //var mode = new ReactiveMode(controller, backRgb, activeRgb);
-
-            // breath mode
-            //var backRgb = new byte[] { 255, 255, 0 };
-            //var mode = new BreathMode(controller, backRgb);
-
-            // blink mode
-            //var backRgb = new byte[] { 255, 0, 0 };
-            //var mode = new BlinkMode(controller, backRgb);
-
-            // sprint mode
-            var backRgb = new byte[] { 1, 28, 73 };
-            var sprintRgb = new byte[] { 0, 0, 255 };
-            var mode = new SprintMode(controller, backRgb, sprintRgb);
-
-            ActiveDevice = new DuckyDevice(device, Exit);
-            ActiveDevice.Use(mode);
+            var mode = new ReactiveMode(controller, backRgb, activeRgb);
 
             using (WebApp.Start(host))
             {
                 Console.WriteLine($"Server started listening on: {host}");
+                ActiveDevice = new DuckyDevice(device, Exit).Use(mode);
                 Application.Run(new ApplicationContext());
             }
         }
