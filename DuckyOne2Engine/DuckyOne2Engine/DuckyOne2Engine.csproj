@@ -78,6 +78,7 @@
     <Compile Include="DuckyDevices\ColorModes\BlinkMode.cs" />
     <Compile Include="DuckyDevices\ColorModes\BreathMode.cs" />
     <Compile Include="DuckyDevices\ColorModes\IColorMode.cs" />
+    <Compile Include="DuckyDevices\ColorModes\ProgressMode.cs" />
     <Compile Include="DuckyDevices\ColorModes\ReactiveMode.cs" />
     <Compile Include="DuckyDevices\ColorModes\SprintMode.cs" />
     <Compile Include="DuckyDevices\DuckyDevice.cs" />
