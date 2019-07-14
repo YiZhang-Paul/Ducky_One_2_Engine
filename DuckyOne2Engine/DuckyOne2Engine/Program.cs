@@ -3,6 +3,7 @@ using DuckyOne2Engine.DuckyDevices;
 using DuckyOne2Engine.DuckyDevices.ColorModes;
 using DuckyOne2Engine.HidDevices;
 using DuckyOne2Engine.KeyMappers;
+using Gma.System.MouseKeyHook;
 using Microsoft.Owin.Hosting;
 using System;
 using System.Linq;
@@ -13,8 +14,6 @@ namespace DuckyOne2Engine
 {
     public class Program
     {
-        public static DuckyDevice ActiveDevice;
-
         static void Main(string[] args)
         {
             const string name = "vid_04d9&pid_0356&mi_01";
@@ -28,23 +27,23 @@ namespace DuckyOne2Engine
             }
 
             var backRgb = new byte[] { 1, 28, 73 };
-            var activeRgb = new byte[] { 255, 255, 255 };
+            var activeRgb = new byte[] { 255, 0, 0 };
             var device = new HidDevice(path, false);
             var controller = new ColorControl(device, new KeyColorMapper());
-            var mode = new ReactiveMode(backRgb, activeRgb);
 
             using (WebApp.Start(host))
             {
-                ActiveDevice = new DuckyDevice(device, controller, Exit).Use(mode);
-                Cache.ActiveDuckyDevice = ActiveDevice;
                 Console.WriteLine($"Server started listening on: {host}");
+                Cache.GlobalKeyboardEvents = Hook.GlobalEvents();
+                Cache.ActiveDuckyDevice = new DuckyDevice(device, controller, Exit);
+                Cache.ActiveDuckyDevice.Use(new ReactiveMode(backRgb, activeRgb));
                 Application.Run(new ApplicationContext());
             }
         }
 
         private static void Exit()
         {
-            ActiveDevice?.Close();
+            Cache.ActiveDuckyDevice?.Close();
             Application.Exit();
         }
     }

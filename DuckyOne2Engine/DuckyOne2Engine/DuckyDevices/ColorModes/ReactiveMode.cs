@@ -1,5 +1,4 @@
 ﻿using DuckyOne2Engine.ColorControls;
-using Gma.System.MouseKeyHook;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,17 +29,17 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             ColorControl = colorControl;
             ColorControl.SetAll(BackRgb);
             ColorControl.ApplyColors();
-            Hook.GlobalEvents().KeyUp += OnKeyUp;
-            Hook.GlobalEvents().KeyDown += OnKeyDown;
+            Cache.GlobalKeyboardEvents.KeyUp += OnKeyUp;
+            Cache.GlobalKeyboardEvents.KeyDown += OnKeyDown;
         }
 
         public void Unload()
         {
-            Hook.GlobalEvents().KeyUp -= OnKeyUp;
-            Hook.GlobalEvents().KeyDown -= OnKeyDown;
+            Cache.GlobalKeyboardEvents.KeyUp -= OnKeyUp;
+            Cache.GlobalKeyboardEvents.KeyDown -= OnKeyDown;
         }
 
-        private async void OnKeyUp(object sender, KeyEventArgs e)
+        private void OnKeyUp(object sender, KeyEventArgs e)
         {
             var key = e.KeyCode.ToString();
 
@@ -54,7 +53,7 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             if (!IsPressed)
             {
                 IsPressed = true;
-                await Task.Run(TurnOffColors);
+                Task.Run(TurnOffColors);
             }
         }
 

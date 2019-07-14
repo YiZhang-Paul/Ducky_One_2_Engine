@@ -20,26 +20,27 @@ namespace DuckyOne2Engine.DuckyDevices
         {
             Device = device;
             ColorControl = colorControl;
+            Setup(onExit);
             Open();
             Thread.Sleep(1500);
-            Setup(onExit);
-        }
-
-        private void Setup(Action onExit)
-        {
-            Hook.GlobalEvents().OnCombination(new Dictionary<Combination, Action>
-            {
-                { Combination.FromString("Control+Shift+M"), onExit }
-            });
         }
 
         public DuckyDevice Use(IColorMode mode)
         {
             ColorMode?.Unload();
+            Thread.Sleep(1000);
             ColorMode = mode;
             ColorMode.Setup(ColorControl);
 
             return this;
+        }
+
+        private void Setup(Action onExit)
+        {
+            Cache.GlobalKeyboardEvents.OnCombination(new Dictionary<Combination, Action>
+            {
+                { Combination.FromString("Control+Shift+M"), onExit }
+            });
         }
 
         public void Open()
@@ -49,7 +50,7 @@ namespace DuckyOne2Engine.DuckyDevices
 
         public void Close()
         {
-            SendCommandFromFile(Device, "Commands/open.txt");
+            SendCommandFromFile(Device, "Commands/close.txt");
             Device.Close();
         }
 
