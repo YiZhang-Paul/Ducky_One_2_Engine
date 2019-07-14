@@ -51,224 +51,117 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
 
         private void SetSprintColors()
         {
+            string[] add;
+            string[] remove;
+
             switch (Position)
             {
                 case 1:
-                    ActiveKeys.Add(Keys.Backtick);
-                    ActiveKeys.Add(Keys.Tab);
-                    ActiveKeys.Add(Keys.Caps);
-                    ActiveKeys.Add(Keys.Lshift);
-                    ActiveKeys.Add(Keys.Lctrl);
+                    add = new[] { Keys.Backtick, Keys.Tab, Keys.Caps, Keys.Lshift, Keys.Lctrl };
+                    SetActiveKeys(add, new string[0]);
                     break;
                 case 2:
-                    ActiveKeys.Add(Keys.Esc);
-                    ActiveKeys.Add(Keys.One);
-                    ActiveKeys.Add(Keys.Q);
-                    ActiveKeys.Add(Keys.A);
+                    add = new[] { Keys.Esc, Keys.One, Keys.Q, Keys.A };
+                    SetActiveKeys(add, new string[0]);
                     break;
                 case 3:
-                    ActiveKeys.Add(Keys.Two);
-                    ActiveKeys.Add(Keys.W);
-                    ActiveKeys.Add(Keys.S);
-                    ActiveKeys.Add(Keys.Z);
-                    ActiveKeys.Add(Keys.Lwindow);
+                    add = new[] { Keys.Two, Keys.W, Keys.S, Keys.Z, Keys.Lwindow };
+                    SetActiveKeys(add, new string[0]);
                     break;
                 case 4:
-                    ActiveKeys.Remove(Keys.Backtick);
-                    ActiveKeys.Remove(Keys.Tab);
-                    ActiveKeys.Remove(Keys.Caps);
-                    ActiveKeys.Add(Keys.F1);
-                    ActiveKeys.Add(Keys.Three);
-                    ActiveKeys.Add(Keys.E);
-                    ActiveKeys.Add(Keys.D);
-                    ActiveKeys.Add(Keys.X);
-                    ActiveKeys.Add(Keys.Lalt);
+                    add = new[] { Keys.F1, Keys.Three, Keys.E, Keys.D, Keys.X, Keys.Lalt };
+                    remove = new[] { Keys.Backtick, Keys.Tab, Keys.Caps };
+                    SetActiveKeys(add, remove);
                     break;
                 case 5:
-                    ActiveKeys.Remove(Keys.Lshift);
-                    ActiveKeys.Remove(Keys.Lctrl);
-                    ActiveKeys.Remove(Keys.Esc);
-                    ActiveKeys.Remove(Keys.One);
-                    ActiveKeys.Remove(Keys.Q);
-                    ActiveKeys.Remove(Keys.A);
-                    ActiveKeys.Add(Keys.F2);
-                    ActiveKeys.Add(Keys.Four);
-                    ActiveKeys.Add(Keys.R);
-                    ActiveKeys.Add(Keys.F);
-                    ActiveKeys.Add(Keys.C);
+                    add = new[] { Keys.F2, Keys.Four, Keys.R, Keys.F, Keys.C };
+                    remove = new[] { Keys.Lshift, Keys.Lctrl, Keys.Esc, Keys.One, Keys.Q, Keys.A };
+                    SetActiveKeys(add, remove);
                     break;
                 case 6:
-                    ActiveKeys.Remove(Keys.Two);
-                    ActiveKeys.Remove(Keys.W);
-                    ActiveKeys.Remove(Keys.S);
-                    ActiveKeys.Remove(Keys.Z);
-                    ActiveKeys.Remove(Keys.Lwindow);
-                    ActiveKeys.Add(Keys.F3);
-                    ActiveKeys.Add(Keys.Five);
-                    ActiveKeys.Add(Keys.T);
-                    ActiveKeys.Add(Keys.G);
-                    ActiveKeys.Add(Keys.V);
+                    add = new[] { Keys.F3, Keys.Five, Keys.T, Keys.G, Keys.V };
+                    remove = new[] { Keys.Two, Keys.W, Keys.S, Keys.Z, Keys.Lwindow };
+                    SetActiveKeys(add, remove);
                     break;
                 case 7:
-                    ActiveKeys.Remove(Keys.F1);
-                    ActiveKeys.Remove(Keys.Three);
-                    ActiveKeys.Remove(Keys.E);
-                    ActiveKeys.Remove(Keys.D);
-                    ActiveKeys.Remove(Keys.X);
-                    ActiveKeys.Remove(Keys.Lalt);
-                    ActiveKeys.Add(Keys.F4);
-                    ActiveKeys.Add(Keys.Six);
-                    ActiveKeys.Add(Keys.Y);
-                    ActiveKeys.Add(Keys.H);
-                    ActiveKeys.Add(Keys.B);
+                    add = new[] { Keys.F4, Keys.Six, Keys.Y, Keys.H, Keys.B };
+                    remove = new[] { Keys.F1, Keys.Three, Keys.E, Keys.D, Keys.X, Keys.Lalt };
+                    SetActiveKeys(add, remove);
                     break;
                 case 8:
-                    ActiveKeys.Remove(Keys.F2);
-                    ActiveKeys.Remove(Keys.Four);
-                    ActiveKeys.Remove(Keys.R);
-                    ActiveKeys.Remove(Keys.F);
-                    ActiveKeys.Remove(Keys.C);
-                    ActiveKeys.Add(Keys.F5);
-                    ActiveKeys.Add(Keys.Seven);
-                    ActiveKeys.Add(Keys.U);
-                    ActiveKeys.Add(Keys.J);
-                    ActiveKeys.Add(Keys.N);
+                    add = new[] { Keys.F5, Keys.Seven, Keys.U, Keys.J, Keys.N };
+                    remove = new[] { Keys.F2, Keys.Four, Keys.R, Keys.F, Keys.C };
+                    SetActiveKeys(add, remove);
                     break;
                 case 9:
-                    ActiveKeys.Remove(Keys.F3);
-                    ActiveKeys.Remove(Keys.Five);
-                    ActiveKeys.Remove(Keys.T);
-                    ActiveKeys.Remove(Keys.G);
-                    ActiveKeys.Remove(Keys.V);
-                    ActiveKeys.Add(Keys.F6);
-                    ActiveKeys.Add(Keys.Eight);
-                    ActiveKeys.Add(Keys.I);
-                    ActiveKeys.Add(Keys.K);
-                    ActiveKeys.Add(Keys.M);
+                    add = new[] { Keys.F6, Keys.Eight, Keys.I, Keys.K, Keys.M };
+                    remove = new[] { Keys.F3, Keys.Five, Keys.T, Keys.G, Keys.V };
+                    SetActiveKeys(add, remove);
                     break;
                 case 10:
-                    ActiveKeys.Remove(Keys.F4);
-                    ActiveKeys.Remove(Keys.Six);
-                    ActiveKeys.Remove(Keys.Y);
-                    ActiveKeys.Remove(Keys.H);
-                    ActiveKeys.Remove(Keys.B);
-                    ActiveKeys.Add(Keys.F7);
-                    ActiveKeys.Add(Keys.Nine);
-                    ActiveKeys.Add(Keys.O);
-                    ActiveKeys.Add(Keys.L);
-                    ActiveKeys.Add(Keys.Comma);
+                    add = new[] { Keys.F7, Keys.Nine, Keys.O, Keys.L, Keys.Comma };
+                    remove = new[] { Keys.F4, Keys.Six, Keys.Y, Keys.H, Keys.B };
+                    SetActiveKeys(add, remove);
                     break;
                 case 11:
-                    ActiveKeys.Remove(Keys.F5);
-                    ActiveKeys.Remove(Keys.Seven);
-                    ActiveKeys.Remove(Keys.U);
-                    ActiveKeys.Remove(Keys.J);
-                    ActiveKeys.Remove(Keys.N);
-                    ActiveKeys.Add(Keys.F8);
-                    ActiveKeys.Add(Keys.Zero);
-                    ActiveKeys.Add(Keys.P);
-                    ActiveKeys.Add(Keys.Semicolon);
-                    ActiveKeys.Add(Keys.Period);
+                    add = new[] { Keys.F8, Keys.Zero, Keys.P, Keys.Semicolon, Keys.Period };
+                    remove = new[] { Keys.F5, Keys.Seven, Keys.U, Keys.J, Keys.N };
+                    SetActiveKeys(add, remove);
                     break;
                 case 12:
-                    ActiveKeys.Remove(Keys.F6);
-                    ActiveKeys.Remove(Keys.Eight);
-                    ActiveKeys.Remove(Keys.I);
-                    ActiveKeys.Remove(Keys.K);
-                    ActiveKeys.Remove(Keys.M);
-                    ActiveKeys.Add(Keys.Hyphen);
-                    ActiveKeys.Add(Keys.Lbracket);
-                    ActiveKeys.Add(Keys.Quote);
-                    ActiveKeys.Add(Keys.Question);
-                    ActiveKeys.Add(Keys.Ralt);
+                    add = new[] { Keys.Hyphen, Keys.Lbracket, Keys.Quote, Keys.Question, Keys.Ralt };
+                    remove = new[] { Keys.F6, Keys.Eight, Keys.I, Keys.K, Keys.M };
+                    SetActiveKeys(add, remove);
                     break;
                 case 13:
-                    ActiveKeys.Remove(Keys.F7);
-                    ActiveKeys.Remove(Keys.Nine);
-                    ActiveKeys.Remove(Keys.O);
-                    ActiveKeys.Remove(Keys.L);
-                    ActiveKeys.Remove(Keys.Comma);
-                    ActiveKeys.Add(Keys.F9);
-                    ActiveKeys.Add(Keys.Equal);
-                    ActiveKeys.Add(Keys.Rbracket);
-                    ActiveKeys.Add(Keys.Enter);
-                    ActiveKeys.Add(Keys.Rshift);
-                    ActiveKeys.Add(Keys.Rwindow);
+                    add = new[] { Keys.F9, Keys.Equal, Keys.Rbracket, Keys.Enter, Keys.Rshift, Keys.Rwindow };
+                    remove = new[] { Keys.F7, Keys.Nine, Keys.O, Keys.L, Keys.Comma };
+                    SetActiveKeys(add, remove);
                     break;
                 case 14:
-                    ActiveKeys.Remove(Keys.F8);
-                    ActiveKeys.Remove(Keys.Zero);
-                    ActiveKeys.Remove(Keys.P);
-                    ActiveKeys.Remove(Keys.Semicolon);
-                    ActiveKeys.Remove(Keys.Period);
-                    ActiveKeys.Add(Keys.F10);
-                    ActiveKeys.Add(Keys.F11);
-                    ActiveKeys.Add(Keys.Backspace);
-                    ActiveKeys.Add(Keys.Pipe);
-                    ActiveKeys.Add(Keys.Fn);
+                    add = new[] { Keys.F10, Keys.F11, Keys.Backspace, Keys.Pipe, Keys.Fn };
+                    remove = new[] { Keys.F8, Keys.Zero, Keys.P, Keys.Semicolon, Keys.Period };
+                    SetActiveKeys(add, remove);
                     break;
                 case 15:
-                    ActiveKeys.Remove(Keys.Hyphen);
-                    ActiveKeys.Remove(Keys.Lbracket);
-                    ActiveKeys.Remove(Keys.Quote);
-                    ActiveKeys.Remove(Keys.Question);
-                    ActiveKeys.Remove(Keys.Ralt);
-                    ActiveKeys.Add(Keys.F12);
-                    ActiveKeys.Add(Keys.Delete);
-                    ActiveKeys.Add(Keys.Rctrl);
-                    ActiveKeys.Add(Keys.Fn);
+                    add = new[] { Keys.F12, Keys.Delete, Keys.Rctrl };
+                    remove = new[] { Keys.Hyphen, Keys.Lbracket, Keys.Quote, Keys.Question, Keys.Ralt };
+                    SetActiveKeys(add, remove);
                     break;
                 case 16:
-                    ActiveKeys.Remove(Keys.F9);
-                    ActiveKeys.Remove(Keys.Equal);
-                    ActiveKeys.Remove(Keys.Rbracket);
-                    ActiveKeys.Remove(Keys.Rwindow);
-                    ActiveKeys.Add(Keys.Insert);
-                    ActiveKeys.Add(Keys.End);
+                    add = new[] { Keys.Insert, Keys.End };
+                    remove = new[] { Keys.F9, Keys.Equal, Keys.Rbracket, Keys.Rwindow };
+                    SetActiveKeys(add, remove);
                     break;
                 case 17:
-                    ActiveKeys.Remove(Keys.F10);
-                    ActiveKeys.Add(Keys.Print);
-                    ActiveKeys.Add(Keys.Home);
-                    ActiveKeys.Add(Keys.Pagedown);
-                    ActiveKeys.Add(Keys.Uarrow);
-                    ActiveKeys.Add(Keys.Larrow);
+                    add = new[] { Keys.Print, Keys.Home, Keys.Pagedown, Keys.Uarrow, Keys.Larrow };
+                    remove = new[] { Keys.F10 };
+                    SetActiveKeys(add, remove);
                     break;
                 case 18:
-                    ActiveKeys.Remove(Keys.F11);
-                    ActiveKeys.Remove(Keys.Backspace);
-                    ActiveKeys.Remove(Keys.Pipe);
-                    ActiveKeys.Remove(Keys.Enter);
-                    ActiveKeys.Remove(Keys.Rshift);
-                    ActiveKeys.Remove(Keys.Fn);
-                    ActiveKeys.Add(Keys.Scroll);
-                    ActiveKeys.Add(Keys.Pageup);
-                    ActiveKeys.Add(Keys.Darrow);
+                    add = new[] { Keys.Scroll, Keys.Pageup, Keys.Darrow };
+                    remove = new[] { Keys.F11, Keys.Backspace, Keys.Pipe, Keys.Enter, Keys.Rshift, Keys.Fn };
+                    SetActiveKeys(add, remove);
                     break;
                 case 19:
-                    ActiveKeys.Add(Keys.Pause);
-                    ActiveKeys.Add(Keys.Rarrow);
+                    add = new[] { Keys.Pause, Keys.Rarrow };
+                    SetActiveKeys(add, new string[0]);
                     break;
                 case 20:
-                    ActiveKeys.Remove(Keys.F12);
-                    ActiveKeys.Remove(Keys.Delete);
-                    ActiveKeys.Remove(Keys.Rctrl);
+                    remove = new[] { Keys.F12, Keys.Delete, Keys.Rctrl };
+                    SetActiveKeys(new string[0], remove);
                     break;
                 case 21:
-                    ActiveKeys.Remove(Keys.Print);
-                    ActiveKeys.Remove(Keys.Insert);
-                    ActiveKeys.Remove(Keys.End);
-                    ActiveKeys.Remove(Keys.Uarrow);
-                    ActiveKeys.Remove(Keys.Larrow);
+                    remove = new[] { Keys.Print, Keys.Insert, Keys.End, Keys.Uarrow, Keys.Larrow };
+                    SetActiveKeys(new string[0], remove);
                     break;
                 case 22:
-                    ActiveKeys.Remove(Keys.Home);
-                    ActiveKeys.Remove(Keys.Pagedown);
-                    ActiveKeys.Remove(Keys.Darrow);
+                    remove = new[] { Keys.Home, Keys.Pagedown, Keys.Darrow };
+                    SetActiveKeys(new string[0], remove);
                     break;
                 case 23:
-                    ActiveKeys.Remove(Keys.Scroll);
-                    ActiveKeys.Remove(Keys.Pageup);
+                    remove = new[] { Keys.Scroll, Keys.Pageup };
+                    SetActiveKeys(new string[0], remove);
                     break;
                 case 24:
                     ActiveKeys.Clear();
@@ -278,6 +171,19 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             }
             
             ColorControl.SetColors(ActiveKeys.Select(_ => new KeyColor(_, SprintRgb)));
+        }
+
+        private void SetActiveKeys(IEnumerable<string> add, IEnumerable<string> remove)
+        {
+            foreach (var key in add)
+            {
+                ActiveKeys.Add(key);
+            }
+
+            foreach (var key in remove)
+            {
+                ActiveKeys.Remove(key);
+            }
         }
     }
 }

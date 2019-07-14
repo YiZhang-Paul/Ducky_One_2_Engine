@@ -3,7 +3,6 @@ using DuckyOne2Engine.DuckyDevices;
 using DuckyOne2Engine.DuckyDevices.ColorModes;
 using DuckyOne2Engine.HidDevices;
 using DuckyOne2Engine.KeyMappers;
-using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
