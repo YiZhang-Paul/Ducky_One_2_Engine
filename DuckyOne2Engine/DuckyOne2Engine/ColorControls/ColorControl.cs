@@ -77,7 +77,10 @@ namespace DuckyOne2Engine.ColorControls
         {
             foreach (var input in CurrentReport)
             {
-                Device.Write(input);
+                if (Device.DeviceConnected)
+                {
+                    Device.Write(input);
+                }
             }
         }
 
