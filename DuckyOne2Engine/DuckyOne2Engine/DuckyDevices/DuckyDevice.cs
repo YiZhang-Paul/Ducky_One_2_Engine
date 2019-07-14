@@ -30,7 +30,7 @@ namespace DuckyOne2Engine.DuckyDevices
             });
         }
 
-        public void UseMode(IColorMode mode)
+        public void Use(IColorMode mode)
         {
             ColorMode?.Unload();
             ColorMode = mode;

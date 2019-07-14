@@ -23,12 +23,19 @@ namespace DuckyOne2Engine
             if (path?.Length > 0)
             {
                 _device = new HidDevice(path, false);
-                var backRgb = new byte[] { 1, 28, 73 };
-                var activeRgb = new byte[] { 255, 255, 255 };
                 var controller = new ColorControl(_device, new KeyColorMapper());
-                var mode = new ReactiveMode(controller, backRgb, activeRgb);
+
+                // reactive mode
+                // var backRgb = new byte[] { 1, 28, 73 };
+                // var activeRgb = new byte[] { 255, 255, 255 };
+                // var mode = new ReactiveMode(controller, backRgb, activeRgb);
+
+                // breath mode
+                var backRgb = new byte[] { 255, 255, 0 };
+                var mode = new BreathMode(controller, backRgb);
+
                 _duckyDevice = new DuckyDevice(_device, Exit);
-                _duckyDevice.UseMode(mode);
+                _duckyDevice.Use(mode);
                 Application.Run(new ApplicationContext());
             }
         }
