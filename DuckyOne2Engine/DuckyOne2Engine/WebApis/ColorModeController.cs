@@ -59,6 +59,26 @@ namespace DuckyOne2Engine.WebApis
             Device.Use(new BreathMode(ParseRgb(backRgb), steps));
         }
 
+        public void PostProgressMode
+        (
+            string backRgb,
+            string innerRgb,
+            string outerRgb,
+            int innerSpeed,
+            int outerSpeed
+        )
+        {
+            if (!IsValidRgb(backRgb) || !IsValidRgb(innerRgb) || !IsValidRgb(outerRgb))
+            {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
+
+            var back = ParseRgb(backRgb);
+            var inner = ParseRgb(innerRgb);
+            var outer = ParseRgb(outerRgb);
+            Device.Use(new ProgressMode(back, inner, outer, innerSpeed, outerSpeed));
+        }
+
         public void PostSprintMode(string backRgb, string sprintRgb, int speed)
         {
             if (!IsValidRgb(backRgb) || !IsValidRgb(sprintRgb))

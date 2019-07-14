@@ -29,6 +29,12 @@ namespace DuckyOne2Engine
 
             config.Routes.MapHttpRoute
             (
+                "SetProgressMode",
+                "api/v1/{controller}/progress/{backRgb}/{innerRgb}/{outerRgb}/{innerSpeed}/{outerSpeed}"
+            );
+
+            config.Routes.MapHttpRoute
+            (
                 "SetSprintMode",
                 "api/v1/{controller}/sprint/{backRgb}/{sprintRgb}/{speed}"
             );
