@@ -26,13 +26,13 @@ namespace DuckyOne2Engine
                 var controller = new ColorControl(_device, new KeyColorMapper());
 
                 // reactive mode
-                // var backRgb = new byte[] { 1, 28, 73 };
-                // var activeRgb = new byte[] { 255, 255, 255 };
-                // var mode = new ReactiveMode(controller, backRgb, activeRgb);
+                //var backRgb = new byte[] { 1, 28, 73 };
+                //var activeRgb = new byte[] { 255, 255, 255 };
+                //var mode = new ReactiveMode(controller, backRgb, activeRgb);
 
                 // breath mode
-                // var backRgb = new byte[] { 255, 255, 0 };
-                // var mode = new BreathMode(controller, backRgb);
+                //var backRgb = new byte[] { 255, 255, 0 };
+                //var mode = new BreathMode(controller, backRgb);
 
                 // blink mode
                 var backRgb = new byte[] { 255, 0, 0 };
