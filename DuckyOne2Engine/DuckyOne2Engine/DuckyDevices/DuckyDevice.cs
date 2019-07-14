@@ -45,6 +45,7 @@ namespace DuckyOne2Engine.DuckyDevices
         public void Close()
         {
             SendCommandFromFile(Device, "Commands/open.txt");
+            Device.Close();
         }
 
         private void SendCommandFromFile(IHidDevice device, string name)

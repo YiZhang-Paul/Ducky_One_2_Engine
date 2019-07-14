@@ -3,56 +3,64 @@ using DuckyOne2Engine.DuckyDevices;
 using DuckyOne2Engine.DuckyDevices.ColorModes;
 using DuckyOne2Engine.HidDevices;
 using DuckyOne2Engine.KeyMappers;
+using Microsoft.Owin.Hosting;
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace DuckyOne2Engine
 {
-    class Program
+    public class Program
     {
-        private static DuckyDevice _duckyDevice;
-        private static IHidDevice _device;
+        public static DuckyDevice ActiveDevice;
 
         static void Main(string[] args)
         {
             const string name = "vid_04d9&pid_0356&mi_01";
+            const string host = "http://localhost:4000/";
             var devices = HidDevice.GetConnectedDevices();
             var path = devices.FirstOrDefault(_ => Regex.IsMatch(_.DevicePath, name)).DevicePath;
 
-            if (path?.Length > 0)
+            if (string.IsNullOrEmpty(path))
             {
-                _device = new HidDevice(path, false);
-                var controller = new ColorControl(_device, new KeyColorMapper());
+                return;
+            }
 
-                // reactive mode
-                //var backRgb = new byte[] { 1, 28, 73 };
-                //var activeRgb = new byte[] { 255, 255, 255 };
-                //var mode = new ReactiveMode(controller, backRgb, activeRgb);
+            var device = new HidDevice(path, false);
+            var controller = new ColorControl(device, new KeyColorMapper());
 
-                // breath mode
-                //var backRgb = new byte[] { 255, 255, 0 };
-                //var mode = new BreathMode(controller, backRgb);
+            // reactive mode
+            //var backRgb = new byte[] { 1, 28, 73 };
+            //var activeRgb = new byte[] { 255, 255, 255 };
+            //var mode = new ReactiveMode(controller, backRgb, activeRgb);
 
-                // blink mode
-                //var backRgb = new byte[] { 255, 0, 0 };
-                //var mode = new BlinkMode(controller, backRgb);
+            // breath mode
+            //var backRgb = new byte[] { 255, 255, 0 };
+            //var mode = new BreathMode(controller, backRgb);
 
-                // sprint mode
-                var backRgb = new byte[] { 1, 28, 73 };
-                var sprintRgb = new byte[] { 0, 0, 255 };
-                var mode = new SprintMode(controller, backRgb, sprintRgb);
+            // blink mode
+            //var backRgb = new byte[] { 255, 0, 0 };
+            //var mode = new BlinkMode(controller, backRgb);
 
-                _duckyDevice = new DuckyDevice(_device, Exit);
-                _duckyDevice.Use(mode);
+            // sprint mode
+            var backRgb = new byte[] { 1, 28, 73 };
+            var sprintRgb = new byte[] { 0, 0, 255 };
+            var mode = new SprintMode(controller, backRgb, sprintRgb);
+
+            ActiveDevice = new DuckyDevice(device, Exit);
+            ActiveDevice.Use(mode);
+
+            using (WebApp.Start(host))
+            {
+                Console.WriteLine($"Server started listening on: {host}");
                 Application.Run(new ApplicationContext());
             }
         }
 
         private static void Exit()
         {
-            _duckyDevice?.Close();
-            _device?.Close();
+            ActiveDevice?.Close();
             Application.Exit();
         }
     }
