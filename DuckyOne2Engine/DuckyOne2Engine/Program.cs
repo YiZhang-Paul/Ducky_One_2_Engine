@@ -31,8 +31,12 @@ namespace DuckyOne2Engine
                 // var mode = new ReactiveMode(controller, backRgb, activeRgb);
 
                 // breath mode
-                var backRgb = new byte[] { 255, 255, 0 };
-                var mode = new BreathMode(controller, backRgb);
+                // var backRgb = new byte[] { 255, 255, 0 };
+                // var mode = new BreathMode(controller, backRgb);
+
+                // blink mode
+                var backRgb = new byte[] { 255, 0, 0 };
+                var mode = new BlinkMode(controller, backRgb);
 
                 _duckyDevice = new DuckyDevice(_device, Exit);
                 _duckyDevice.Use(mode);
