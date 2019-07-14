@@ -15,21 +15,19 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
         private byte[] BackRgb { get; }
         private byte[] SprintRgb { get; }
         private HashSet<string> ActiveKeys { get; } = new HashSet<string>();
-        private IColorControl ColorControl { get; }
 
-        public SprintMode(IColorControl colorControl, byte[] backRgb, byte[] sprintRgb, int speed = 30)
+        public SprintMode(byte[] backRgb, byte[] sprintRgb, int speed = 30)
         {
-            ColorControl = colorControl;
             BackRgb = backRgb;
             SprintRgb = sprintRgb;
             Speed = speed;
         }
 
-        public void Setup()
+        public void Setup(IColorControl colorControl)
         {
-            ColorControl.SetAll(BackRgb);
-            ColorControl.ApplyColors();
-            Task.Run(() => Sprint());
+            colorControl.SetAll(BackRgb);
+            colorControl.ApplyColors();
+            Task.Run(() => Sprint(colorControl));
         }
 
         public void Unload()
@@ -37,19 +35,19 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             IsSprinting = false;
         }
 
-        private void Sprint()
+        private void Sprint(IColorControl colorControl)
         {
             while (IsSprinting)
             {
                 Thread.Sleep(Speed);
                 Position = Position < 24 ? Position + 1 : 0;
-                ColorControl.SetAll(BackRgb);
-                SetSprintColors();
-                ColorControl.ApplyColors();
+                colorControl.SetAll(BackRgb);
+                SetSprintColors(colorControl);
+                colorControl.ApplyColors();
             }
         }
 
-        private void SetSprintColors()
+        private void SetSprintColors(IColorControl colorControl)
         {
             string[] add;
             string[] remove;
@@ -169,8 +167,8 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
                 default:
                     return;
             }
-            
-            ColorControl.SetColors(ActiveKeys.Select(_ => new KeyColor(_, SprintRgb)));
+
+            colorControl.SetColors(ActiveKeys.Select(_ => new KeyColor(_, SprintRgb)));
         }
 
         private void SetActiveKeys(IEnumerable<string> add, IEnumerable<string> remove)

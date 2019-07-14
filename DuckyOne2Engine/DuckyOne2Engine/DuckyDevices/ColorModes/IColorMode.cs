@@ -1,8 +1,10 @@
-﻿namespace DuckyOne2Engine.DuckyDevices.ColorModes
+﻿using DuckyOne2Engine.ColorControls;
+
+namespace DuckyOne2Engine.DuckyDevices.ColorModes
 {
     public interface IColorMode
     {
-        void Setup();
+        void Setup(IColorControl colorControl);
         void Unload();
     }
 }

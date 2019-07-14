@@ -11,21 +11,19 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
         private int CurrentStep { get; set; }
         private bool IsBreathing { get; set; } = true;
         private byte[] BackRgb { get; }
-        private IColorControl ColorControl { get; }
 
-        public BreathMode(IColorControl colorControl, byte[] backRgb, int steps = 70)
+        public BreathMode(byte[] backRgb, int steps = 70)
         {
-            ColorControl = colorControl;
             BackRgb = backRgb;
             Steps = steps;
             CurrentStep = steps;
         }
 
-        public void Setup()
+        public void Setup(IColorControl colorControl)
         {
-            ColorControl.SetAll(BackRgb);
-            ColorControl.ApplyColors();
-            Task.Run(() => Breath());
+            colorControl.SetAll(BackRgb);
+            colorControl.ApplyColors();
+            Task.Run(() => Breath(colorControl));
         }
 
         public void Unload()
@@ -33,15 +31,15 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             IsBreathing = false;
         }
 
-        private void Breath(bool off = true)
+        private void Breath(IColorControl colorControl, bool off = true)
         {
             while (IsBreathing)
             {
                 Thread.Sleep(20);
                 off = off ? CurrentStep - 1 >= 0 : CurrentStep + 1 > Steps;
                 CurrentStep = off ? --CurrentStep : ++CurrentStep;
-                ColorControl.SetAll(NextColor());
-                ColorControl.ApplyColors();
+                colorControl.SetAll(NextColor());
+                colorControl.ApplyColors();
             }
         }
 

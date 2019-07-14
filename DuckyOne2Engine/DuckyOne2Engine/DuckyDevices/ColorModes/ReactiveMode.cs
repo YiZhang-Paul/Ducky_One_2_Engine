@@ -15,19 +15,19 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
         private bool IsPressed { get; set; }
         private byte[] BackRgb { get; }
         private byte[] ActiveRgb { get; }
-        private IColorControl ColorControl { get; }
+        private IColorControl ColorControl { get; set; }
         private Dictionary<string, int> KeyPressed { get; } = new Dictionary<string, int>();
 
-        public ReactiveMode(IColorControl colorControl, byte[] backRgb, byte[] activeRgb, int steps = 60)
+        public ReactiveMode(byte[] backRgb, byte[] activeRgb, int steps = 60)
         {
-            ColorControl = colorControl;
             BackRgb = backRgb;
             ActiveRgb = activeRgb;
             Steps = steps;
         }
 
-        public void Setup()
+        public void Setup(IColorControl colorControl)
         {
+            ColorControl = colorControl;
             ColorControl.SetAll(BackRgb);
             ColorControl.ApplyColors();
             Hook.GlobalEvents().KeyUp += OnKeyUp;

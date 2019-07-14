@@ -1,4 +1,5 @@
-﻿using DuckyOne2Engine.DuckyDevices.ColorModes;
+﻿using DuckyOne2Engine.ColorControls;
+using DuckyOne2Engine.DuckyDevices.ColorModes;
 using DuckyOne2Engine.HidDevices;
 using Gma.System.MouseKeyHook;
 using System;
@@ -12,11 +13,13 @@ namespace DuckyOne2Engine.DuckyDevices
     public class DuckyDevice
     {
         private IHidDevice Device { get; }
+        private IColorControl ColorControl { get; }
         private IColorMode ColorMode { get; set; }
 
-        public DuckyDevice(IHidDevice device, Action onExit)
+        public DuckyDevice(IHidDevice device, IColorControl colorControl, Action onExit)
         {
             Device = device;
+            ColorControl = colorControl;
             Open();
             Thread.Sleep(1500);
             Setup(onExit);
@@ -34,7 +37,7 @@ namespace DuckyOne2Engine.DuckyDevices
         {
             ColorMode?.Unload();
             ColorMode = mode;
-            ColorMode.Setup();
+            ColorMode.Setup(ColorControl);
 
             return this;
         }

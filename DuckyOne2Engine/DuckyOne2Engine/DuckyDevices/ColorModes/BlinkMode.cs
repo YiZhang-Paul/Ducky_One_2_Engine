@@ -10,20 +10,18 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
         private bool IsOn { get; set; } = true;
         private bool IsBlinking { get; set; } = true;
         private byte[] BackRgb { get; }
-        private IColorControl ColorControl { get; }
 
-        public BlinkMode(IColorControl colorControl, byte[] backRgb, int interval = 750)
+        public BlinkMode(byte[] backRgb, int interval = 750)
         {
-            ColorControl = colorControl;
             BackRgb = backRgb;
             Interval = interval;
         }
 
-        public void Setup()
+        public void Setup(IColorControl colorControl)
         {
-            ColorControl.SetAll(BackRgb);
-            ColorControl.ApplyColors();
-            Task.Run(() => Blink());
+            colorControl.SetAll(BackRgb);
+            colorControl.ApplyColors();
+            Task.Run(() => Blink(colorControl));
         }
 
         public void Unload()
@@ -31,14 +29,14 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             IsBlinking = false;
         }
 
-        private void Blink()
+        private void Blink(IColorControl colorControl)
         {
             while (IsBlinking)
             {
                 Thread.Sleep(Interval);
                 IsOn = !IsOn;
-                ColorControl.SetAll(IsOn ? BackRgb : new byte[] { 0, 0, 0 });
-                ColorControl.ApplyColors();
+                colorControl.SetAll(IsOn ? BackRgb : new byte[] { 0, 0, 0 });
+                colorControl.ApplyColors();
             }
         }
     }

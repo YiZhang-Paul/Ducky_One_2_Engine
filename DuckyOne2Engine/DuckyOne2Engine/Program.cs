@@ -31,12 +31,13 @@ namespace DuckyOne2Engine
             var activeRgb = new byte[] { 255, 255, 255 };
             var device = new HidDevice(path, false);
             var controller = new ColorControl(device, new KeyColorMapper());
-            var mode = new ReactiveMode(controller, backRgb, activeRgb);
+            var mode = new ReactiveMode(backRgb, activeRgb);
 
             using (WebApp.Start(host))
             {
+                ActiveDevice = new DuckyDevice(device, controller, Exit).Use(mode);
+                Cache.ActiveDuckyDevice = ActiveDevice;
                 Console.WriteLine($"Server started listening on: {host}");
-                ActiveDevice = new DuckyDevice(device, Exit).Use(mode);
                 Application.Run(new ApplicationContext());
             }
         }
