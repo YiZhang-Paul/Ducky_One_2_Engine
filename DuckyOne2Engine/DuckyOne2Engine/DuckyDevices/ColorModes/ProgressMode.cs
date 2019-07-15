@@ -1,5 +1,7 @@
 ﻿using DuckyOne2Engine.ColorControls;
 using DuckyOne2Engine.KeyMappers;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,10 +33,19 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             Keys.Rctrl, Keys.Fn, Keys.Rwindow, Keys.Ralt, Keys.Space, Keys.Lalt, Keys.Lwindow
         };
 
+        private readonly byte[][] _rgb =
+        {
+            new byte[] { 255, 0, 0 }, 
+            new byte[] { 0, 255, 0 }, 
+            new byte[] { 0, 0, 255 }
+        };
+
         private int InnerSpeed { get; }
         private int OuterSpeed { get; }
-        private int InnerIndex { get; set; }
-        private int OuterIndex { get; set; }
+        private int InnerRgbPointer { get; set; }
+        private int OuterRgbPointer { get; set; } = 1;
+        private int[] InnerIndexes { get; set; }
+        private int[] OuterIndexes { get; set; }
         private bool IsProgressing { get; set; } = true;
         private byte[] BackRgb { get; }
         private byte[] InnerRgb { get; }
@@ -45,8 +56,8 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             byte[] backRgb,
             byte[] innerRgb,
             byte[] outerRgb,
-            int innerSpeed = 90,
-            int outerSpeed = 140
+            int innerSpeed = 40,
+            int outerSpeed = 70
         )
         {
             BackRgb = backRgb;
@@ -54,12 +65,15 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             OuterRgb = outerRgb;
             InnerSpeed = innerSpeed;
             OuterSpeed = outerSpeed;
+            InnerIndexes = GetInnerIndexes(0);
+            OuterIndexes = GetOuterIndexes(0);
         }
 
         public void Setup(IColorControl colorControl)
         {
             colorControl.SetAll(BackRgb);
             colorControl.ApplyColors();
+            Task.Run(() => SetRgbPointers());
             Task.Run(() => InnerProgress(colorControl));
             Task.Run(() => OuterProgress(colorControl));
         }
@@ -69,14 +83,58 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             IsProgressing = false;
         }
 
+        private int[] GetInnerIndexes(int start)
+        {
+            return GetColorIndexes(start, 15, _innerKeys.Length - 1);
+        }
+
+        private int[] GetOuterIndexes(int start)
+        {
+            return GetColorIndexes(start, 22, _outerKeys.Length - 1);
+        }
+
+        private int[] GetColorIndexes(int start, int total, int maxIndex)
+        {
+            var indexes = new List<int> { start };
+
+            for (int i = 0; i < total - 1; ++i)
+            {
+                var last = indexes.Last();
+                indexes.Add(last > 0 ? last - 1 : maxIndex);
+            }
+
+            return indexes.ToArray();
+        }
+
+        private void SetRgbPointers()
+        {
+            while (IsProgressing)
+            {
+                Thread.Sleep(500);
+                InnerRgbPointer = InnerRgbPointer > _rgb.Length - 2 ? 0 : InnerRgbPointer + 1;
+                OuterRgbPointer = OuterRgbPointer > _rgb.Length - 2 ? 0 : OuterRgbPointer + 1;
+            }
+        }
+
         private void InnerProgress(IColorControl colorControl)
         {
             while (IsProgressing)
             {
                 Thread.Sleep(InnerSpeed);
-                colorControl.SetColor(new KeyColor(_innerKeys[InnerIndex], BackRgb));
-                InnerIndex = InnerIndex + 1 > _innerKeys.Length - 1 ? 0 : InnerIndex + 1;
-                colorControl.SetColor(new KeyColor(_innerKeys[InnerIndex], InnerRgb));
+                SetColors(colorControl, _innerKeys, BackRgb);
+                var start = InnerIndexes[0] > _innerKeys.Length - 2 ? 0 : InnerIndexes[0] + 1;
+                InnerIndexes = GetInnerIndexes(start);
+                var keys = InnerIndexes.Select(_ => _innerKeys[_]).ToArray();
+                SetColors(colorControl, keys, InnerRgb);
+
+                for (int i = 0; i < 2; ++i)
+                {
+                    if (i < keys.Length)
+                    {
+                        colorControl.SetColor(new KeyColor(keys[i], _rgb[InnerRgbPointer]));
+                    }
+                }
+
                 colorControl.ApplyColors();
             }
         }
@@ -86,10 +144,27 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             while (IsProgressing)
             {
                 Thread.Sleep(OuterSpeed);
-                colorControl.SetColor(new KeyColor(_outerKeys[OuterIndex], BackRgb));
-                OuterIndex = OuterIndex + 1 > _outerKeys.Length - 1 ? 0 : OuterIndex + 1;
-                colorControl.SetColor(new KeyColor(_outerKeys[OuterIndex], OuterRgb));
+                SetColors(colorControl, _outerKeys, BackRgb);
+                var start = OuterIndexes[0] > _outerKeys.Length - 2 ? 0 : OuterIndexes[0] + 1;
+                OuterIndexes = GetOuterIndexes(start);
+                var keys = OuterIndexes.Select(_ => _outerKeys[_]).ToArray();
+                SetColors(colorControl, keys, OuterRgb);
+
+                for (int i = 0; i < 2; ++i)
+                {
+                    if (i < keys.Length)
+                    {
+                        colorControl.SetColor(new KeyColor(keys[0], _rgb[OuterRgbPointer]));
+                    }
+                }
+
+                colorControl.ApplyColors();
             }
+        }
+
+        private void SetColors(IColorControl colorControl, IEnumerable<string> keys, byte[] color)
+        {
+            colorControl.SetColors(keys.Select(_ => new KeyColor(_, color)));
         }
     }
 }
