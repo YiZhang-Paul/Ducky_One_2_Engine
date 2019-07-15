@@ -40,12 +40,13 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             new byte[] { 0, 0, 255 }
         };
 
+        private int _innerRgbPointer;
+        private int _outerRgbPointer = 1;
+
         private int InnerSpeed { get; }
         private int OuterSpeed { get; }
-        private int InnerRgbPointer { get; set; }
-        private int OuterRgbPointer { get; set; } = 1;
-        private int[] InnerIndexes { get; set; }
-        private int[] OuterIndexes { get; set; }
+        private List<int> InnerIndexes { get; set; }
+        private List<int> OuterIndexes { get; set; }
         private bool IsProgressing { get; set; } = true;
         private byte[] BackRgb { get; }
         private byte[] InnerRgb { get; }
@@ -65,8 +66,6 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             OuterRgb = outerRgb;
             InnerSpeed = innerSpeed;
             OuterSpeed = outerSpeed;
-            InnerIndexes = GetInnerIndexes(0);
-            OuterIndexes = GetOuterIndexes(0);
         }
 
         public void Setup(IColorControl colorControl)
@@ -83,17 +82,7 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             IsProgressing = false;
         }
 
-        private int[] GetInnerIndexes(int start)
-        {
-            return GetColorIndexes(start, 15, _innerKeys.Length - 1);
-        }
-
-        private int[] GetOuterIndexes(int start)
-        {
-            return GetColorIndexes(start, 22, _outerKeys.Length - 1);
-        }
-
-        private int[] GetColorIndexes(int start, int total, int maxIndex)
+        private List<int> GetColorIndexes(int start, int total, int maxIndex)
         {
             var indexes = new List<int> { start };
 
@@ -103,61 +92,65 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
                 indexes.Add(last > 0 ? last - 1 : maxIndex);
             }
 
-            return indexes.ToArray();
+            return indexes;
         }
 
         private void SetRgbPointers()
         {
             while (IsProgressing)
             {
-                Thread.Sleep(500);
-                InnerRgbPointer = InnerRgbPointer > _rgb.Length - 2 ? 0 : InnerRgbPointer + 1;
-                OuterRgbPointer = OuterRgbPointer > _rgb.Length - 2 ? 0 : OuterRgbPointer + 1;
+                Thread.Sleep(1500);
+                _innerRgbPointer = _innerRgbPointer > _rgb.Length - 2 ? 0 : _innerRgbPointer + 1;
+                _outerRgbPointer = _outerRgbPointer > _rgb.Length - 2 ? 0 : _outerRgbPointer + 1;
             }
         }
 
         private void InnerProgress(IColorControl colorControl)
         {
-            while (IsProgressing)
+            const int ringLength = 18;
+
+            if (InnerIndexes == null)
             {
-                Thread.Sleep(InnerSpeed);
-                SetColors(colorControl, _innerKeys, BackRgb);
-                var start = InnerIndexes[0] > _innerKeys.Length - 2 ? 0 : InnerIndexes[0] + 1;
-                InnerIndexes = GetInnerIndexes(start);
-                var keys = InnerIndexes.Select(_ => _innerKeys[_]).ToArray();
-                SetColors(colorControl, keys, InnerRgb);
-
-                for (int i = 0; i < 2; ++i)
-                {
-                    if (i < keys.Length)
-                    {
-                        colorControl.SetColor(new KeyColor(keys[i], _rgb[InnerRgbPointer]));
-                    }
-                }
-
-                colorControl.ApplyColors();
+                InnerIndexes = GetColorIndexes(0, ringLength, _innerKeys.Length - 1);
             }
+
+            Progress(colorControl, InnerRgb, InnerSpeed, ringLength, InnerIndexes, _innerKeys, ref _innerRgbPointer);
         }
 
         private void OuterProgress(IColorControl colorControl)
         {
+            const int ringLength = 26;
+
+            if (OuterIndexes == null)
+            {
+                OuterIndexes = GetColorIndexes(0, ringLength, _outerKeys.Length - 1);
+            }
+
+            Progress(colorControl, OuterRgb, OuterSpeed, ringLength, OuterIndexes, _outerKeys, ref _outerRgbPointer);
+        }
+
+        private void Progress
+        (
+            IColorControl colorControl,
+            byte[] color,
+            int speed,
+            int ringLength,
+            List<int> activeIndexes,
+            string[] allKeys,
+            ref int rgbPointer
+        )
+        {
             while (IsProgressing)
             {
-                Thread.Sleep(OuterSpeed);
-                SetColors(colorControl, _outerKeys, BackRgb);
-                var start = OuterIndexes[0] > _outerKeys.Length - 2 ? 0 : OuterIndexes[0] + 1;
-                OuterIndexes = GetOuterIndexes(start);
-                var keys = OuterIndexes.Select(_ => _outerKeys[_]).ToArray();
-                SetColors(colorControl, keys, OuterRgb);
-
-                for (int i = 0; i < 2; ++i)
-                {
-                    if (i < keys.Length)
-                    {
-                        colorControl.SetColor(new KeyColor(keys[0], _rgb[OuterRgbPointer]));
-                    }
-                }
-
+                Thread.Sleep(speed);
+                SetColors(colorControl, allKeys, BackRgb);
+                var start = activeIndexes[0] > allKeys.Length - 2 ? 0 : activeIndexes[0] + 1;
+                activeIndexes.Clear();
+                activeIndexes.AddRange(GetColorIndexes(start, ringLength, allKeys.Length - 1));
+                var activeKeys = activeIndexes.Select(_ => allKeys[_]).ToArray();
+                SetColors(colorControl, activeKeys, color);
+                colorControl.SetColor(new KeyColor(activeKeys[0], _rgb[rgbPointer]));
+                colorControl.SetColor(new KeyColor(activeKeys[1], _rgb[rgbPointer]));
                 colorControl.ApplyColors();
             }
         }
