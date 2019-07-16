@@ -70,6 +70,18 @@ namespace DuckyOne2Engine.WebApis
             Device.Use(new ProgressMode(back, inner, outer, meta.InnerSpeed, meta.OuterSpeed));
         }
 
+        [Route("shift")]
+        public void PostShiftMode([FromBody]ShiftModeDto meta)
+        {
+            if (meta.BackRgbs.Split('-').Any(_ => !IsValidRgb(_)))
+            {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
+
+            var backs = meta.BackRgbs.Split('-').Select(ParseRgb);
+            Device.Use(new ShiftMode(backs.ToArray(), meta.Interval));
+        }
+
         [Route("sprint")]
         public void PostSprintMode([FromBody]SprintModeDto meta)
         {
