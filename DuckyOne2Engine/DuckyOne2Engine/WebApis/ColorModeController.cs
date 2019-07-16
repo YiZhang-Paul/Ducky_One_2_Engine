@@ -73,13 +73,15 @@ namespace DuckyOne2Engine.WebApis
         [Route("shift")]
         public void PostShiftMode([FromBody]ShiftModeDto meta)
         {
-            if (meta.BackRgbs.Split('-').Any(_ => !IsValidRgb(_)))
+            var rgbs = meta.BackRgbs.Split('|');
+
+            if (!rgbs.All(IsValidRgb))
             {
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
             }
 
-            var backs = meta.BackRgbs.Split('-').Select(ParseRgb);
-            Device.Use(new ShiftMode(backs.ToArray(), meta.Interval));
+            var backs = rgbs.Select(ParseRgb).ToArray();
+            Device.Use(new ShiftMode(backs, meta.Interval));
         }
 
         [Route("sprint")]
