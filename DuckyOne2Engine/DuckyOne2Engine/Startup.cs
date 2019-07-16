@@ -8,37 +8,7 @@ namespace DuckyOne2Engine
         public void Configuration(IAppBuilder builder)
         {
             var config = new HttpConfiguration();
-
-            config.Routes.MapHttpRoute
-            (
-                "SetReactiveMode",
-                "api/v1/{controller}/reactive/{backRgb}/{activeRgb}/{steps}"
-            );
-
-            config.Routes.MapHttpRoute
-            (
-                "SetBlinkMode",
-                "api/v1/{controller}/blink/{backRgb}/{interval}"
-            );
-
-            config.Routes.MapHttpRoute
-            (
-                "SetBreathMode",
-                "api/v1/{controller}/breath/{backRgb}/{steps}"
-            );
-
-            config.Routes.MapHttpRoute
-            (
-                "SetProgressMode",
-                "api/v1/{controller}/progress/{backRgb}/{innerRgb}/{outerRgb}/{innerSpeed}/{outerSpeed}"
-            );
-
-            config.Routes.MapHttpRoute
-            (
-                "SetSprintMode",
-                "api/v1/{controller}/sprint/{backRgb}/{sprintRgb}/{speed}"
-            );
-
+            config.MapHttpAttributeRoutes();
             builder.UseWebApi(config);
         }
     }

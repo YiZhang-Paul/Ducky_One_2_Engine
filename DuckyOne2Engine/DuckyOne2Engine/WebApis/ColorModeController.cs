@@ -1,4 +1,5 @@
-﻿using DuckyOne2Engine.DuckyDevices;
+﻿using DuckyOne2Engine.Dtos;
+using DuckyOne2Engine.DuckyDevices;
 using DuckyOne2Engine.DuckyDevices.ColorModes;
 using System;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Web.Http;
 
 namespace DuckyOne2Engine.WebApis
 {
+    [RoutePrefix("api/v1/colorMode")]
     public class ColorModeController : ApiController
     {
         private DuckyDevice Device { get; }
@@ -19,74 +21,76 @@ namespace DuckyOne2Engine.WebApis
             Device = device;
         }
 
+        [Route("reactive")]
+        public void PostReactiveMode([FromBody]ReactiveModeDto meta)
+        {
+            if (!IsValidRgb(meta.BackRgb) || !IsValidRgb(meta.ActiveRgb))
+            {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
+
+            var back = ParseRgb(meta.BackRgb);
+            var active = ParseRgb(meta.ActiveRgb);
+            Device.Use(new ReactiveMode(back, active, meta.Steps));
+        }
+
+        [Route("blink")]
+        public void PostBlinkMode([FromBody]BlinkModeDto meta)
+        {
+            if (!IsValidRgb(meta.BackRgb))
+            {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
+
+            Device.Use(new BlinkMode(ParseRgb(meta.BackRgb), meta.Interval));
+        }
+
+        [Route("breath")]
+        public void PostBreathMode([FromBody]BreathModeDto meta)
+        {
+            if (!IsValidRgb(meta.BackRgb))
+            {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
+
+            Device.Use(new BreathMode(ParseRgb(meta.BackRgb), meta.Steps));
+        }
+
+        [Route("progress")]
+        public void PostProgressMode([FromBody]ProgressModeDto meta)
+        {
+            if (!IsValidRgb(meta.BackRgb) || !IsValidRgb(meta.InnerRgb) || !IsValidRgb(meta.OuterRgb))
+            {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
+
+            var back = ParseRgb(meta.BackRgb);
+            var inner = ParseRgb(meta.InnerRgb);
+            var outer = ParseRgb(meta.OuterRgb);
+            Device.Use(new ProgressMode(back, inner, outer, meta.InnerSpeed, meta.OuterSpeed));
+        }
+
+        [Route("sprint")]
+        public void PostSprintMode([FromBody]SprintModeDto meta)
+        {
+            if (!IsValidRgb(meta.BackRgb) || !IsValidRgb(meta.SprintRgb))
+            {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
+
+            var back = ParseRgb(meta.BackRgb);
+            var sprint = ParseRgb(meta.SprintRgb);
+            Device.Use(new SprintMode(back, sprint, meta.Speed));
+        }
+
         private bool IsValidRgb(string rgb)
         {
-            return Regex.IsMatch(rgb, @"^\d+-\d+-\d+$");
+            return Regex.IsMatch(rgb, @"^\d+,\d+,\d+$");
         }
 
         private byte[] ParseRgb(string rgb)
         {
-            return rgb.Split('-').Select(_ => Convert.ToByte(_)).ToArray();
-        }
-
-        public void PostReactiveMode(string backRgb, string activeRgb, int steps)
-        {
-            if (!IsValidRgb(backRgb) || !IsValidRgb(activeRgb))
-            {
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
-            }
-
-            Device.Use(new ReactiveMode(ParseRgb(backRgb), ParseRgb(activeRgb), steps));
-        }
-
-        public void PostBlinkMode(string backRgb, int interval)
-        {
-            if (!IsValidRgb(backRgb))
-            {
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
-            }
-
-            Device.Use(new BlinkMode(ParseRgb(backRgb), interval));
-        }
-
-        public void PostBreathMode(string backRgb, int steps)
-        {
-            if (!IsValidRgb(backRgb))
-            {
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
-            }
-
-            Device.Use(new BreathMode(ParseRgb(backRgb), steps));
-        }
-
-        public void PostProgressMode
-        (
-            string backRgb,
-            string innerRgb,
-            string outerRgb,
-            int innerSpeed,
-            int outerSpeed
-        )
-        {
-            if (!IsValidRgb(backRgb) || !IsValidRgb(innerRgb) || !IsValidRgb(outerRgb))
-            {
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
-            }
-
-            var back = ParseRgb(backRgb);
-            var inner = ParseRgb(innerRgb);
-            var outer = ParseRgb(outerRgb);
-            Device.Use(new ProgressMode(back, inner, outer, innerSpeed, outerSpeed));
-        }
-
-        public void PostSprintMode(string backRgb, string sprintRgb, int speed)
-        {
-            if (!IsValidRgb(backRgb) || !IsValidRgb(sprintRgb))
-            {
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
-            }
-
-            Device.Use(new SprintMode(ParseRgb(backRgb), ParseRgb(sprintRgb), speed));
+            return rgb.Split(',').Select(_ => Convert.ToByte(_)).ToArray();
         }
     }
 }
