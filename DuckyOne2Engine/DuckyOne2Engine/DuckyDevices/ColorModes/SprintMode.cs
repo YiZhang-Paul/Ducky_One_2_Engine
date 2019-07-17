@@ -1,5 +1,6 @@
 ﻿using DuckyOne2Engine.ColorControls;
 using DuckyOne2Engine.KeyMappers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -9,6 +10,8 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
 {
     public class SprintMode : IColorMode
     {
+        private int Steps { get; } = 30;
+        private int CurrentStep { get; set; }
         private int Speed { get; }
         private int Position { get; set; }
         private bool IsSprinting { get; set; } = true;
@@ -35,13 +38,15 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             IsSprinting = false;
         }
 
-        private void Sprint(IColorControl colorControl)
+        private void Sprint(IColorControl colorControl, bool off = true)
         {
             while (IsSprinting)
             {
                 Thread.Sleep(Speed);
+                off = off ? CurrentStep - 1 >= 0 : CurrentStep + 1 > Steps;
+                CurrentStep = off ? --CurrentStep : ++CurrentStep;
+                colorControl.SetAll(NextColor());
                 Position = Position < 24 ? Position + 1 : 0;
-                colorControl.SetAll(BackRgb);
                 SetSprintColors(colorControl);
                 colorControl.ApplyColors();
             }
@@ -182,6 +187,22 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             {
                 ActiveKeys.Remove(key);
             }
+        }
+
+        private byte[] NextColor()
+        {
+            byte NextValue(byte value)
+            {
+                var delta = (int)Math.Ceiling((double)value / Steps);
+
+                return (byte)Math.Max(0, value - (Steps - CurrentStep) * delta);
+            }
+
+            var r = NextValue(BackRgb[0]);
+            var g = NextValue(BackRgb[1]);
+            var b = NextValue(BackRgb[2]);
+
+            return new[] { r, g, b };
         }
     }
 }
