@@ -70,6 +70,19 @@ namespace DuckyOne2Engine.WebApis
             Device.Use(new ProgressMode(back, inner, outer, meta.InnerSpeed, meta.OuterSpeed));
         }
 
+        [Route("wave")]
+        public void PostWaveMode([FromBody]WaveModeDto meta)
+        {
+            if (!IsValidRgb(meta.BackRgb) || !IsValidRgb(meta.WaveRgb))
+            {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
+
+            var back = ParseRgb(meta.BackRgb);
+            var wave = ParseRgb(meta.WaveRgb);
+            Device.Use(new WaveMode(back, wave));
+        }
+
         [Route("shift")]
         public void PostShiftMode([FromBody]ShiftModeDto meta)
         {

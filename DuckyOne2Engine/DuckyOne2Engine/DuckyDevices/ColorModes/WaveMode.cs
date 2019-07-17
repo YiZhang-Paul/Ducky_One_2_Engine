@@ -61,32 +61,38 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
 
         private void Blink(IColorControl colorControl)
         {
+            const int transitionOne = 3;
+            const int transitionTwo = 6;
             int index = 0;
 
             while (IsMoving)
             {
-                var isOutward = Stage != 3;
-                Thread.Sleep(isOutward ? 250 : 500);
-                colorControl.SetAll(Stage == 6 ? WaveRgb : BackRgb);
-                SetColors(colorControl, _rings[index], WaveRgb);
+                Thread.Sleep(Stage >= transitionTwo ? 150 : 50);
+                colorControl.SetAll(Stage == transitionTwo + 2 ? WaveRgb : BackRgb);
 
-                if (Stage == 5)
+                if (Stage == transitionTwo + 1 && index > 1)
                 {
-                   SetColors(colorControl, _rings[2], WaveRgb);
-
-                    if (index > 1)
-                    {
-                        SetColors(colorControl, _rings[1], WaveRgb);
-                    }
+                    SetColors(colorControl, _rings[1], WaveRgb);
                 }
 
+                if (Stage == transitionTwo && index > 2 || Stage > transitionTwo)
+                {
+                    SetColors(colorControl, _rings[2], WaveRgb);
+                }
+
+                if (index >= 0 && index < _rings.Length)
+                {
+                    SetColors(colorControl, _rings[index], WaveRgb);
+                }
+
+                var isOutward = Stage < transitionOne || Stage >= transitionTwo;
                 index = isOutward ? index + 1 : index - 1;
 
-                if (isOutward && index == _rings.Length - 1 || !isOutward && index == 0)
+                if (isOutward && index == _rings.Length + 1 || !isOutward && index == -2)
                 {
-                    Stage = Stage < 6 ? Stage + 1 : 0;
-                    index = Stage == 3 ? _rings.Length - 1 : 0;
-                    Thread.Sleep(Stage > 3 ? 250 : 50);
+                    Stage = Stage < transitionTwo + 2 ? Stage + 1 : 0;
+                    index = Stage < transitionOne || Stage >= transitionTwo ? 0 : _rings.Length - 1;
+                    Thread.Sleep(Stage >= transitionTwo ? 450 : 25);
                 }
 
                 colorControl.ApplyColors();

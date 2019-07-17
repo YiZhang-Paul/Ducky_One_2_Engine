@@ -81,6 +81,7 @@
     <Compile Include="Dtos\ReactiveModeDto.cs" />
     <Compile Include="Dtos\ShiftModeDto.cs" />
     <Compile Include="Dtos\SprintModeDto.cs" />
+    <Compile Include="Dtos\WaveModeDto.cs" />
     <Compile Include="DuckyDevices\ColorModes\BlinkMode.cs" />
     <Compile Include="DuckyDevices\ColorModes\BreathMode.cs" />
     <Compile Include="DuckyDevices\ColorModes\IColorMode.cs" />
