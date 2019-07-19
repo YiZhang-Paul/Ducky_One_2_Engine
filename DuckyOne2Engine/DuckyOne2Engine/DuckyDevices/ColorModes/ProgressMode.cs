@@ -71,10 +71,10 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
                 colorControl.SetAll(BackRgb);
                 var start = ActivePrimary[0] > _primaryKeys.Length - 2 ? 0 : ActivePrimary[0] + 1;
                 ActivePrimary = GetIndexes(start, _totalActivePrimary, _primaryKeys.Length - 1);
-                SetColors(colorControl, ActivePrimary.Select(_ => _primaryKeys[_]), PrimaryRgb);
+                colorControl.SetColors(ActivePrimary.Select(_ => _primaryKeys[_]), PrimaryRgb);
                 start = ActiveSecondary[0] > _secondaryKeys.Length - 2 ? 0 : ActiveSecondary[0] + 1;
                 ActiveSecondary = GetIndexes(start, _totalActiveSecondary, _secondaryKeys.Length - 1);
-                SetColors(colorControl, ActiveSecondary.Select(_ => _secondaryKeys[_]), SecondaryRgb);
+                colorControl.SetColors(ActiveSecondary.Select(_ => _secondaryKeys[_]), SecondaryRgb);
                 colorControl.ApplyColors();
             }
         }
@@ -90,11 +90,6 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             }
 
             return indexes;
-        }
-
-        private void SetColors(IColorControl colorControl, IEnumerable<string> keys, byte[] color)
-        {
-            colorControl.SetColors(keys.Select(_ => new KeyColor(_, color)));
         }
     }
 }

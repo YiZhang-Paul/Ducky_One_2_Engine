@@ -6,6 +6,7 @@ namespace DuckyOne2Engine.ColorControls
     {
         bool SetColor(KeyColor color);
         bool SetColors(IEnumerable<KeyColor> colors);
+        bool SetColors(IEnumerable<string> keys, byte[] color);
         void SetAll(byte[] color);
         void ApplyColors();
     }

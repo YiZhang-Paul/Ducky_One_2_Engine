@@ -1,5 +1,4 @@
 ﻿using DuckyOne2Engine.ColorControls;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -50,7 +49,7 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
                 Thread.Sleep(Interval);
                 IsOn = !IsOn;
                 colorControl.SetAll(IsOn ? BlinkRgb : BackRgb);
-                colorControl.SetColors(SpecialKeys.Select(_ => new KeyColor(_, SpecialRgb)));
+                colorControl.SetColors(SpecialKeys, SpecialRgb);
                 colorControl.ApplyColors();
             }
         }

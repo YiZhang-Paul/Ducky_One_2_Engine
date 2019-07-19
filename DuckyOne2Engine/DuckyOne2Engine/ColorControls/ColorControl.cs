@@ -65,6 +65,11 @@ namespace DuckyOne2Engine.ColorControls
             return result;
         }
 
+        public bool SetColors(IEnumerable<string> keys, byte[] color)
+        {
+            return SetColors(keys.Select(_ => new KeyColor(_, color)));
+        }
+
         public void SetAll(byte[] color)
         {
             foreach (var key in Keys.AllKeys)

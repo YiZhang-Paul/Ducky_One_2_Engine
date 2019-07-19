@@ -1,6 +1,5 @@
 ﻿using DuckyOne2Engine.ColorControls;
 using DuckyOne2Engine.KeyMappers;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -72,17 +71,17 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
 
                 if (Stage == transitionTwo + 1 && index > 1)
                 {
-                    SetColors(colorControl, _rings[1], WaveRgb);
+                    colorControl.SetColors(_rings[1], WaveRgb);
                 }
 
                 if (Stage == transitionTwo && index > 2 || Stage > transitionTwo)
                 {
-                    SetColors(colorControl, _rings[2], WaveRgb);
+                    colorControl.SetColors(_rings[2], WaveRgb);
                 }
 
                 if (index >= 0 && index < _rings.Length)
                 {
-                    SetColors(colorControl, _rings[index], WaveRgb);
+                    colorControl.SetColors(_rings[index], WaveRgb);
                 }
 
                 var isOutward = Stage < transitionOne || Stage >= transitionTwo;
@@ -97,11 +96,6 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
 
                 colorControl.ApplyColors();
             }
-        }
-
-        private void SetColors(IColorControl colorControl, string[] keys, byte[] color)
-        {
-            colorControl.SetColors(keys.Select(_ => new KeyColor(_, color)));
         }
     }
 }

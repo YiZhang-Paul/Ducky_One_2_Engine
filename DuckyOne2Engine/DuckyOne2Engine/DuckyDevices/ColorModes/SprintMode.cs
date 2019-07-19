@@ -2,7 +2,6 @@
 using DuckyOne2Engine.KeyMappers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -173,7 +172,7 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
                     return;
             }
 
-            colorControl.SetColors(ActiveKeys.Select(_ => new KeyColor(_, SprintRgb)));
+            colorControl.SetColors(ActiveKeys, SprintRgb);
         }
 
         private void SetActiveKeys(IEnumerable<string> add, IEnumerable<string> remove)
