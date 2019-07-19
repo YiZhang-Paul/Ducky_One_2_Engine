@@ -61,6 +61,20 @@ namespace DuckyOne2Engine.WebApis
             Device.Use(new WaveMode(back, wave));
         }
 
+        [Route("blink")]
+        public void PostBlinkMode([FromBody]BlinkModeDto meta)
+        {
+            if (!IsValidRgb(meta.BackRgb) || !IsValidRgb(meta.BlinkRgb) || !IsValidRgb(meta.SpecialRgb))
+            {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
+
+            var back = ParseRgb(meta.BackRgb);
+            var blink = ParseRgb(meta.BlinkRgb);
+            var special = ParseRgb(meta.SpecialRgb);
+            Device.Use(new BlinkMode(back, blink, special, meta.SpecialKeys, meta.Interval));
+        }
+
         [Route("shift")]
         public void PostShiftMode([FromBody]ShiftModeDto meta)
         {
