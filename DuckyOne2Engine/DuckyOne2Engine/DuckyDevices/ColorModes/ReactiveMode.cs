@@ -10,8 +10,10 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
 {
     public class ReactiveMode : IColorMode
     {
+        private readonly object _keysLock = new object();
+
         private int Steps { get; }
-        private bool IsPressed { get; set; }
+        private bool IsActive { get; set; } = true;
         private byte[] BackRgb { get; }
         private byte[] ActiveRgb { get; }
         private IColorControl ColorControl { get; set; }
@@ -31,69 +33,60 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             ColorControl.ApplyColors();
             Cache.GlobalKeyboardEvents.KeyUp += OnKeyUp;
             Cache.GlobalKeyboardEvents.KeyDown += OnKeyDown;
+            Task.Run(() => TurnOffColors());
         }
 
         public void Unload()
         {
             Cache.GlobalKeyboardEvents.KeyUp -= OnKeyUp;
             Cache.GlobalKeyboardEvents.KeyDown -= OnKeyDown;
+            IsActive = false;
         }
 
         private void OnKeyUp(object sender, KeyEventArgs e)
         {
-            var key = e.KeyCode.ToString();
-
-            if (!ColorControl.SetColor(new KeyColor(key, ActiveRgb)))
+            lock (_keysLock)
             {
-                return;
-            }
-
-            KeyPressed[key] = Steps;
-
-            if (!IsPressed)
-            {
-                IsPressed = true;
-                Task.Run(TurnOffColors);
+                KeyPressed[e.KeyCode.ToString()] = Steps;
             }
         }
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
             var key = e.KeyCode.ToString();
-
-            if (!ColorControl.SetColor(new KeyColor(key, ActiveRgb)))
-            {
-                return;
-            }
-
+            ColorControl.SetColor(new KeyColor(key, ActiveRgb));
             ColorControl.ApplyColors();
 
             if (KeyPressed.ContainsKey(key))
             {
-                KeyPressed.Remove(key);
-            }
-        }
-
-        private async Task TurnOffColors()
-        {
-            foreach (var key in KeyPressed.Keys.ToList())
-            {
-                var color = KeyPressed[key] == 0 ? BackRgb : NextColor(KeyPressed[key]);
-                ColorControl.SetColor(new KeyColor(key, color));
-
-                if (KeyPressed[key]-- == 0)
+                lock (_keysLock)
                 {
                     KeyPressed.Remove(key);
                 }
             }
+        }
 
-            ColorControl.ApplyColors();
-            IsPressed = KeyPressed.Any();
-
-            if (IsPressed)
+        private void TurnOffColors()
+        {
+            while (IsActive)
             {
                 Thread.Sleep(15);
-                await Task.Run(TurnOffColors);
+
+                lock (_keysLock)
+                {
+                    foreach (var key in KeyPressed.Keys.ToList())
+                    {
+                        var color = KeyPressed[key] == 0 ? BackRgb : NextColor(KeyPressed[key]);
+                        ColorControl.SetColor(new KeyColor(key, color));
+
+                        if (KeyPressed[key]-- == 0)
+                        {
+                            KeyPressed.Remove(key);
+                        }
+                    }
+                }
+
+                ColorControl.ApplyColors();
             }
         }
 
