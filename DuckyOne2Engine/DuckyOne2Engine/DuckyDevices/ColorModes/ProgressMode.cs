@@ -9,7 +9,10 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
 {
     public class ProgressMode : IColorMode
     {
-        private readonly string[] _innerKeys =
+        private readonly int _totalActivePrimary = 18;
+        private readonly int _totalActiveSecondary = 26;
+
+        private readonly string[] _primaryKeys =
         {
             Keys.One, Keys.Q, Keys.A, Keys.Z, Keys.X, Keys.C, Keys.D, Keys.E,
             Keys.Three, Keys.Four, Keys.Five, Keys.T, Keys.G, Keys.B, Keys.N,
@@ -21,7 +24,7 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             Keys.Semicolon, Keys.P, Keys.Zero, Keys.Hyphen, Keys.Equal, Keys.Rbracket
         };
 
-        private readonly string[] _outerKeys =
+        private readonly string[] _secondaryKeys =
         {
             Keys.Lctrl, Keys.Lshift, Keys.Caps, Keys.Tab, Keys.Backtick, Keys.Esc,
             Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8,
@@ -30,37 +33,29 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             Keys.Fn, Keys.Rwindow, Keys.Ralt, Keys.Space, Keys.Lalt, Keys.Lwindow
         };
 
-        private int InnerSpeed { get; }
-        private int OuterSpeed { get; }
-        private List<int> InnerIndexes { get; set; }
-        private List<int> OuterIndexes { get; set; }
+        private int Speed { get; }
+        private List<int> ActivePrimary { get; set; }
+        private List<int> ActiveSecondary { get; set; }
         private bool IsProgressing { get; set; } = true;
         private byte[] BackRgb { get; }
-        private byte[] InnerRgb { get; }
-        private byte[] OuterRgb { get; }
+        private byte[] PrimaryRgb { get; }
+        private byte[] SecondaryRgb { get; }
 
-        public ProgressMode
-        (
-            byte[] backRgb,
-            byte[] innerRgb,
-            byte[] outerRgb,
-            int innerSpeed = 25,
-            int outerSpeed = 55
-        )
+        public ProgressMode(byte[] backRgb, byte[] primaryRgb, byte[] secondaryRgb, int speed = 25)
         {
             BackRgb = backRgb;
-            InnerRgb = innerRgb;
-            OuterRgb = outerRgb;
-            InnerSpeed = innerSpeed;
-            OuterSpeed = outerSpeed;
+            PrimaryRgb = primaryRgb;
+            SecondaryRgb = secondaryRgb;
+            Speed = speed;
+            ActivePrimary = GetIndexes(0, _totalActivePrimary, _primaryKeys.Length - 1);
+            ActiveSecondary = GetIndexes(0, _totalActiveSecondary, _secondaryKeys.Length - 1);
         }
 
         public void Setup(IColorControl colorControl)
         {
             colorControl.SetAll(BackRgb);
             colorControl.ApplyColors();
-            Task.Run(() => InnerProgress(colorControl));
-            Task.Run(() => OuterProgress(colorControl));
+            Task.Run(() => Progress(colorControl));
         }
 
         public void Unload()
@@ -68,7 +63,23 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             IsProgressing = false;
         }
 
-        private List<int> GetColorIndexes(int start, int total, int maxIndex)
+        private void Progress(IColorControl colorControl)
+        {
+            while (IsProgressing)
+            {
+                Thread.Sleep(Speed);
+                colorControl.SetAll(BackRgb);
+                var start = ActivePrimary[0] > _primaryKeys.Length - 2 ? 0 : ActivePrimary[0] + 1;
+                ActivePrimary = GetIndexes(start, _totalActivePrimary, _primaryKeys.Length - 1);
+                SetColors(colorControl, ActivePrimary.Select(_ => _primaryKeys[_]), PrimaryRgb);
+                start = ActiveSecondary[0] > _secondaryKeys.Length - 2 ? 0 : ActiveSecondary[0] + 1;
+                ActiveSecondary = GetIndexes(start, _totalActiveSecondary, _secondaryKeys.Length - 1);
+                SetColors(colorControl, ActiveSecondary.Select(_ => _secondaryKeys[_]), SecondaryRgb);
+                colorControl.ApplyColors();
+            }
+        }
+
+        private List<int> GetIndexes(int start, int total, int maxIndex)
         {
             var indexes = new List<int> { start };
 
@@ -79,53 +90,6 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             }
 
             return indexes;
-        }
-
-        private void InnerProgress(IColorControl colorControl)
-        {
-            const int ringLength = 18;
-
-            if (InnerIndexes == null)
-            {
-                InnerIndexes = GetColorIndexes(0, ringLength, _innerKeys.Length - 1);
-            }
-
-            Progress(colorControl, InnerRgb, InnerSpeed, ringLength, InnerIndexes, _innerKeys);
-        }
-
-        private void OuterProgress(IColorControl colorControl)
-        {
-            const int ringLength = 26;
-
-            if (OuterIndexes == null)
-            {
-                OuterIndexes = GetColorIndexes(0, ringLength, _outerKeys.Length - 1);
-            }
-
-            Progress(colorControl, OuterRgb, OuterSpeed, ringLength, OuterIndexes, _outerKeys);
-        }
-
-        private void Progress
-        (
-            IColorControl colorControl,
-            byte[] color,
-            int speed,
-            int ringLength,
-            List<int> activeIndexes,
-            string[] allKeys
-        )
-        {
-            while (IsProgressing)
-            {
-                Thread.Sleep(speed);
-                SetColors(colorControl, allKeys, BackRgb);
-                var start = activeIndexes[0] > allKeys.Length - 2 ? 0 : activeIndexes[0] + 1;
-                activeIndexes.Clear();
-                activeIndexes.AddRange(GetColorIndexes(start, ringLength, allKeys.Length - 1));
-                var activeKeys = activeIndexes.Select(_ => allKeys[_]).ToArray();
-                SetColors(colorControl, activeKeys, color);
-                colorControl.ApplyColors();
-            }
         }
 
         private void SetColors(IColorControl colorControl, IEnumerable<string> keys, byte[] color)

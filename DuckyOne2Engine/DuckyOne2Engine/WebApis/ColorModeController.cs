@@ -67,7 +67,7 @@ namespace DuckyOne2Engine.WebApis
             var back = ParseRgb(meta.BackRgb);
             var inner = ParseRgb(meta.InnerRgb);
             var outer = ParseRgb(meta.OuterRgb);
-            Device.Use(new ProgressMode(back, inner, outer, meta.InnerSpeed, meta.OuterSpeed));
+            Device.Use(new ProgressMode(back, inner, outer, meta.Speed));
         }
 
         [Route("wave")]
