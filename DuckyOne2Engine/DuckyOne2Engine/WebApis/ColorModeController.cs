@@ -34,28 +34,6 @@ namespace DuckyOne2Engine.WebApis
             Device.Use(new ReactiveMode(back, active, meta.Steps));
         }
 
-        [Route("blink")]
-        public void PostBlinkMode([FromBody]BlinkModeDto meta)
-        {
-            if (!IsValidRgb(meta.BackRgb))
-            {
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
-            }
-
-            Device.Use(new BlinkMode(ParseRgb(meta.BackRgb), meta.Interval));
-        }
-
-        [Route("breath")]
-        public void PostBreathMode([FromBody]BreathModeDto meta)
-        {
-            if (!IsValidRgb(meta.BackRgb))
-            {
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
-            }
-
-            Device.Use(new BreathMode(ParseRgb(meta.BackRgb), meta.Steps));
-        }
-
         [Route("progress")]
         public void PostProgressMode([FromBody]ProgressModeDto meta)
         {
