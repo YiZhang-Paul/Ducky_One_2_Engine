@@ -92,18 +92,18 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
 
         private byte[] NextColor(int step)
         {
-            byte NextValue(byte value)
+            byte NextValue(byte min, byte value)
             {
-                var delta = (int)Math.Ceiling((double)value / Steps);
+                var delta = (int)Math.Ceiling((double)(value - min) / Steps);
 
-                return (byte)Math.Max(0, value - (Steps - step) * delta);
+                return (byte)Math.Max(min, value - (Steps - step) * delta);
             }
 
-            var r = NextValue(ActiveRgb[0]);
-            var g = NextValue(ActiveRgb[1]);
-            var b = NextValue(ActiveRgb[2]);
+            var r = NextValue(BackRgb[0], ActiveRgb[0]);
+            var g = NextValue(BackRgb[1], ActiveRgb[1]);
+            var b = NextValue(BackRgb[2], ActiveRgb[2]);
 
-            if (r <= 60 && g <= 60 && b <= 60)
+            if (r <= BackRgb[0] && g <= BackRgb[1] && b <= BackRgb[2])
             {
                 return BackRgb;
             }
