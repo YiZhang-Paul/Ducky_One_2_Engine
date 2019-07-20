@@ -1,4 +1,6 @@
-﻿namespace DuckyOne2Engine.KeyMappers
+﻿using System;
+
+namespace DuckyOne2Engine.KeyMappers
 {
     public static class Keys
     {
@@ -101,5 +103,9 @@
             Print, Insert, Delete, Home, End, Pause, Scroll, Pageup, Pagedown,
             Larrow, Rarrow, Uarrow, Darrow
         };
+
+        public static string RandomKey => AllKeys[Random.Next(AllKeys.Length)];
+
+        private static readonly Random Random = new Random();
     }
 }

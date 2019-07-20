@@ -92,14 +92,15 @@ namespace DuckyOne2Engine.WebApis
         [Route("sprint")]
         public void PostSprintMode([FromBody]SprintModeDto meta)
         {
-            if (!IsValidRgb(meta.BackRgb) || !IsValidRgb(meta.SprintRgb))
+            if (!IsValidRgb(meta.BackRgb) || !IsValidRgb(meta.DropRgb) || !IsValidRgb(meta.SprintRgb))
             {
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
             }
 
             var back = ParseRgb(meta.BackRgb);
+            var drop = ParseRgb(meta.DropRgb);
             var sprint = ParseRgb(meta.SprintRgb);
-            Device.Use(new SprintMode(back, sprint, meta.Speed));
+            Device.Use(new SprintMode(back, drop, sprint, meta.Speed));
         }
 
         private bool IsValidRgb(string rgb)

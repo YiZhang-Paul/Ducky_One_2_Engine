@@ -2,6 +2,7 @@
 using DuckyOne2Engine.KeyMappers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,18 +10,37 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
 {
     public class SprintMode : IColorMode
     {
-        private int Steps { get; } = 30;
-        private int CurrentStep { get; set; }
-        private int Speed { get; }
-        private int Position { get; set; }
-        private bool IsSprinting { get; set; } = true;
-        private byte[] BackRgb { get; }
-        private byte[] SprintRgb { get; }
-        private HashSet<string> ActiveKeys { get; } = new HashSet<string>();
+        private readonly string[][] _arrowKeys =
+        {
+            new[] { Keys.Two, Keys.W, Keys.S, Keys.Z },
+            new[] { Keys.Three, Keys.E, Keys.D, Keys.X },
+            new[] { Keys.Four, Keys.R, Keys.F, Keys.C },
+            new[] { Keys.Five, Keys.T, Keys.G, Keys.V },
+            new[] { Keys.Six, Keys.Y, Keys.H, Keys.B },
+            new[] { Keys.Seven, Keys.U, Keys.J, Keys.N },
+            new[] { Keys.Eight, Keys.I, Keys.K, Keys.M },
+            new[] { Keys.Nine, Keys.O, Keys.L, Keys.Comma },
+            new[] { Keys.Zero, Keys.P, Keys.Semicolon, Keys.Period },
+            new[] { Keys.Hyphen, Keys.Lbracket, Keys.Quote, Keys.Question }
+        };
 
-        public SprintMode(byte[] backRgb, byte[] sprintRgb, int speed = 30)
+        private const int BreathSteps = 30;
+        private const int DropSteps = 45;
+        private const int MaxDrops = 35;
+
+        private int CurrentBreathStep { get; set; }
+        private int Position { get; set; }
+        private int Speed { get; }
+        private bool IsSprinting { get; set; } = true;
+        private Dictionary<string, int> Drops { get; } = new Dictionary<string, int>();
+        private byte[] BackRgb { get; }
+        private byte[] DropRgb { get; }
+        private byte[] SprintRgb { get; }
+
+        public SprintMode(byte[] backRgb, byte[] dropRgb, byte[] sprintRgb, int speed = 30)
         {
             BackRgb = backRgb;
+            DropRgb = dropRgb;
             SprintRgb = sprintRgb;
             Speed = speed;
         }
@@ -42,164 +62,63 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             while (IsSprinting)
             {
                 Thread.Sleep(Speed);
-                off = off ? CurrentStep - 1 >= 0 : CurrentStep + 1 > Steps;
-                CurrentStep = off ? --CurrentStep : ++CurrentStep;
-                colorControl.SetAll(NextColor());
-                Position = Position < 24 ? Position + 1 : 0;
-                SetSprintColors(colorControl);
+                off = off ? CurrentBreathStep >= 1 : CurrentBreathStep + 1 > BreathSteps;
+                SetBreathColor(colorControl, off);
+                SetDropsColor(colorControl);
+                SetArrowColor(colorControl);
                 colorControl.ApplyColors();
             }
         }
 
-        private void SetSprintColors(IColorControl colorControl)
+        private void SetBreathColor(IColorControl colorControl, bool off)
         {
-            string[] add;
-            string[] remove;
-
-            switch (Position)
-            {
-                case 1:
-                    add = new[] { Keys.Backtick, Keys.Tab, Keys.Caps, Keys.Lshift, Keys.Lctrl };
-                    SetActiveKeys(add, new string[0]);
-                    break;
-                case 2:
-                    add = new[] { Keys.Esc, Keys.One, Keys.Q, Keys.A };
-                    SetActiveKeys(add, new string[0]);
-                    break;
-                case 3:
-                    add = new[] { Keys.Two, Keys.W, Keys.S, Keys.Z, Keys.Lwindow };
-                    SetActiveKeys(add, new string[0]);
-                    break;
-                case 4:
-                    add = new[] { Keys.F1, Keys.Three, Keys.E, Keys.D, Keys.X, Keys.Lalt };
-                    remove = new[] { Keys.Backtick, Keys.Tab, Keys.Caps };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 5:
-                    add = new[] { Keys.F2, Keys.Four, Keys.R, Keys.F, Keys.C };
-                    remove = new[] { Keys.Lshift, Keys.Lctrl, Keys.Esc, Keys.One, Keys.Q, Keys.A };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 6:
-                    add = new[] { Keys.F3, Keys.Five, Keys.T, Keys.G, Keys.V };
-                    remove = new[] { Keys.Two, Keys.W, Keys.S, Keys.Z, Keys.Lwindow };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 7:
-                    add = new[] { Keys.F4, Keys.Six, Keys.Y, Keys.H, Keys.B };
-                    remove = new[] { Keys.F1, Keys.Three, Keys.E, Keys.D, Keys.X, Keys.Lalt };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 8:
-                    add = new[] { Keys.F5, Keys.Seven, Keys.U, Keys.J, Keys.N };
-                    remove = new[] { Keys.F2, Keys.Four, Keys.R, Keys.F, Keys.C };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 9:
-                    add = new[] { Keys.F6, Keys.Eight, Keys.I, Keys.K, Keys.M };
-                    remove = new[] { Keys.F3, Keys.Five, Keys.T, Keys.G, Keys.V };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 10:
-                    add = new[] { Keys.F7, Keys.Nine, Keys.O, Keys.L, Keys.Comma };
-                    remove = new[] { Keys.F4, Keys.Six, Keys.Y, Keys.H, Keys.B };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 11:
-                    add = new[] { Keys.F8, Keys.Zero, Keys.P, Keys.Semicolon, Keys.Period };
-                    remove = new[] { Keys.F5, Keys.Seven, Keys.U, Keys.J, Keys.N };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 12:
-                    add = new[] { Keys.Hyphen, Keys.Lbracket, Keys.Quote, Keys.Question, Keys.Ralt };
-                    remove = new[] { Keys.F6, Keys.Eight, Keys.I, Keys.K, Keys.M };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 13:
-                    add = new[] { Keys.F9, Keys.Equal, Keys.Rbracket, Keys.Enter, Keys.Rshift, Keys.Rwindow };
-                    remove = new[] { Keys.F7, Keys.Nine, Keys.O, Keys.L, Keys.Comma };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 14:
-                    add = new[] { Keys.F10, Keys.F11, Keys.Backspace, Keys.Pipe, Keys.Fn };
-                    remove = new[] { Keys.F8, Keys.Zero, Keys.P, Keys.Semicolon, Keys.Period };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 15:
-                    add = new[] { Keys.F12, Keys.Delete, Keys.Rctrl };
-                    remove = new[] { Keys.Hyphen, Keys.Lbracket, Keys.Quote, Keys.Question, Keys.Ralt };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 16:
-                    add = new[] { Keys.Insert, Keys.End };
-                    remove = new[] { Keys.F9, Keys.Equal, Keys.Rbracket, Keys.Rwindow };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 17:
-                    add = new[] { Keys.Print, Keys.Home, Keys.Pagedown, Keys.Uarrow, Keys.Larrow };
-                    remove = new[] { Keys.F10 };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 18:
-                    add = new[] { Keys.Scroll, Keys.Pageup, Keys.Darrow };
-                    remove = new[] { Keys.F11, Keys.Backspace, Keys.Pipe, Keys.Enter, Keys.Rshift, Keys.Fn };
-                    SetActiveKeys(add, remove);
-                    break;
-                case 19:
-                    add = new[] { Keys.Pause, Keys.Rarrow };
-                    SetActiveKeys(add, new string[0]);
-                    break;
-                case 20:
-                    remove = new[] { Keys.F12, Keys.Delete, Keys.Rctrl };
-                    SetActiveKeys(new string[0], remove);
-                    break;
-                case 21:
-                    remove = new[] { Keys.Print, Keys.Insert, Keys.End, Keys.Uarrow, Keys.Larrow };
-                    SetActiveKeys(new string[0], remove);
-                    break;
-                case 22:
-                    remove = new[] { Keys.Home, Keys.Pagedown, Keys.Darrow };
-                    SetActiveKeys(new string[0], remove);
-                    break;
-                case 23:
-                    remove = new[] { Keys.Scroll, Keys.Pageup };
-                    SetActiveKeys(new string[0], remove);
-                    break;
-                case 24:
-                    ActiveKeys.Clear();
-                    break;
-                default:
-                    return;
-            }
-
-            colorControl.SetColors(ActiveKeys, SprintRgb);
+            CurrentBreathStep = off ? --CurrentBreathStep : ++CurrentBreathStep;
+            colorControl.SetAll(NextColor(BackRgb, BreathSteps, CurrentBreathStep));
         }
 
-        private void SetActiveKeys(IEnumerable<string> add, IEnumerable<string> remove)
+        private void SetArrowColor(IColorControl colorControl)
         {
-            foreach (var key in add)
+            colorControl.SetColors(_arrowKeys[Position], SprintRgb);
+            Position = Position > _arrowKeys.Length - 2 ? 0 : Position + 1;
+            colorControl.SetColors(_arrowKeys[Position], SprintRgb);
+        }
+
+        private void SetDropsColor(IColorControl colorControl)
+        {
+            if (Drops.Count < MaxDrops)
             {
-                ActiveKeys.Add(key);
+                Drops[Keys.RandomKey] = DropSteps;
             }
 
-            foreach (var key in remove)
+            foreach (var key in Drops.Keys.ToList())
             {
-                ActiveKeys.Remove(key);
+                var color = NextColor(DropRgb, DropSteps, Drops[key]);
+                colorControl.SetColor(new KeyColor(key, color));
+
+                if (--Drops[key] == 0)
+                {
+                    Drops.Remove(key);
+                }
             }
         }
 
-        private byte[] NextColor()
+        private byte[] NextColor(byte[] color, int totalSteps, int currentStep)
         {
-            byte NextValue(byte value)
+            byte NextValue(byte value, byte min = 35)
             {
-                var delta = (int)Math.Ceiling((double)value / Steps);
+                if (value < min)
+                {
+                    return value;
+                }
 
-                return (byte)Math.Max(0, value - (Steps - CurrentStep) * delta);
+                var delta = (int)Math.Ceiling((double)(value - min) / totalSteps);
+
+                return (byte)Math.Max(min, value - (totalSteps - currentStep) * delta);
             }
 
-            var r = NextValue(BackRgb[0]);
-            var g = NextValue(BackRgb[1]);
-            var b = NextValue(BackRgb[2]);
+            var r = NextValue(color[0]);
+            var g = NextValue(color[1]);
+            var b = NextValue(color[2]);
 
             return new[] { r, g, b };
         }
