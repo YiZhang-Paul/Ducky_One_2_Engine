@@ -1,5 +1,6 @@
 ﻿using DuckyOne2Engine.ColorControls;
 using DuckyOne2Engine.KeyMappers;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,16 +27,17 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             },
             new[]
             {
-                Keys.Lctrl, Keys.Lshift, Keys.Caps, Keys.Tab, Keys.Backtick, Keys.Esc,
-                Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6,
+                Keys.Esc, Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6,
                 Keys.F7, Keys.F8, Keys.F9, Keys.F10, Keys.F11, Keys.F12,
                 Keys.Print, Keys.Scroll, Keys.Pause, Keys.Pageup, Keys.Pagedown,
                 Keys.Rarrow, Keys.Darrow, Keys.Larrow, Keys.Rctrl, Keys.Fn,
-                Keys.Rwindow, Keys.Ralt, Keys.Space, Keys.Lalt, Keys.Lwindow
+                Keys.Rwindow, Keys.Ralt, Keys.Space, Keys.Lalt, Keys.Lwindow,
+                Keys.Lctrl, Keys.Lshift, Keys.Caps, Keys.Tab, Keys.Backtick
             }
         };
 
         private int Stage { get; set; }
+        private int Step { get; set; }
         private bool IsMoving { get; set; } = true;
         private byte[] BackRgb { get; }
         private byte[] WaveRgb { get; }
@@ -60,41 +62,102 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
 
         private void Blink(IColorControl colorControl)
         {
-            const int transitionOne = 3;
-            const int transitionTwo = 6;
-            int index = 0;
-
             while (IsMoving)
             {
-                Thread.Sleep(Stage >= transitionTwo ? 150 : 50);
-                colorControl.SetAll(Stage == transitionTwo + 2 ? WaveRgb : BackRgb);
+                colorControl.SetAll(BackRgb);
 
-                if (Stage == transitionTwo + 1 && index > 1)
+                switch (Stage)
                 {
-                    colorControl.SetColors(_rings[1], WaveRgb);
-                }
-
-                if (Stage == transitionTwo && index > 2 || Stage > transitionTwo)
-                {
-                    colorControl.SetColors(_rings[2], WaveRgb);
-                }
-
-                if (index >= 0 && index < _rings.Length)
-                {
-                    colorControl.SetColors(_rings[index], WaveRgb);
-                }
-
-                var isOutward = Stage < transitionOne || Stage >= transitionTwo;
-                index = isOutward ? index + 1 : index - 1;
-
-                if (isOutward && index == _rings.Length + 1 || !isOutward && index == -2)
-                {
-                    Stage = Stage < transitionTwo + 2 ? Stage + 1 : 0;
-                    index = Stage < transitionOne || Stage >= transitionTwo ? 0 : _rings.Length - 1;
-                    Thread.Sleep(Stage >= transitionTwo ? 450 : 25);
+                    case 0:
+                        SetStageOneColors(colorControl);
+                        break;
+                    case 1:
+                        SetStageTwoColors(colorControl);
+                        break;
+                    case 2:
+                        SetStageThreeColors(colorControl);
+                        break;
                 }
 
                 colorControl.ApplyColors();
+            }
+        }
+
+        private void SetStageOneColors(IColorControl colorControl)
+        {
+            Thread.Sleep(70);
+
+            if (Step == _rings.Length * 2)
+            {
+                Thread.Sleep(150);
+            }
+
+            int mod = Step % _rings.Length;
+            int index = Step < _rings.Length * 2 ? mod : _rings.Length - 1 - mod;
+            colorControl.SetColors(_rings[index], WaveRgb);
+
+            if (Step++ == _rings.Length * 4)
+            {
+                Stage++;
+                Step = 0;
+            }
+        }
+
+        private void SetStageTwoColors(IColorControl colorControl)
+        {
+            Thread.Sleep(300);
+
+            if (Step == 0 || Step == 3 || Step == 5)
+            {
+                Thread.Sleep(250);
+            }
+
+            colorControl.SetColors(_rings[Step % _rings.Length], WaveRgb);
+            
+            if (Step > 2 && Step < 5)
+            {
+                colorControl.SetColors(_rings.Last(), WaveRgb);
+            }
+            else if (Step >= 5)
+            {
+                colorControl.SetAll(WaveRgb);
+            }
+
+            if (Step++ == 6)
+            {
+                Stage++;
+                Step = 0;
+            }
+        }
+
+        private void SetStageThreeColors(IColorControl colorControl)
+        {
+            Thread.Sleep(10);
+
+            for (int i = 0; i < Step; ++i)
+            {
+                string key;
+
+                if (i < _rings[2].Length)
+                {
+                    key = _rings[2][i];
+                }
+                else if (i - _rings[2].Length < _rings[1].Length)
+                {
+                    key = _rings[1][i - _rings[2].Length];
+                }
+                else
+                {
+                    key = _rings[0][i - _rings[1].Length - _rings[2].Length];
+                }
+
+                colorControl.SetColor(new KeyColor(key, WaveRgb));
+            }
+
+            if (Step++ == _rings.Sum(_ => _.Length))
+            {
+                Stage = 0;
+                Step = 0;
             }
         }
     }
