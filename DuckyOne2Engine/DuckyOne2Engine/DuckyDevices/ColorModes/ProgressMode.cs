@@ -104,7 +104,7 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
                 colorControl.SetColor(new KeyColor(_secondaryKeys[i], SecondaryRgbs[i]));
             }
 
-            if (++CurrentStep == 10)
+            if (++CurrentStep == 25)
             {
                 CurrentStep = 0;
                 SecondaryRgbs = GetSecondaryColors();

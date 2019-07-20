@@ -8,26 +8,45 @@ namespace DuckyOne2Engine.HidDevices
 {
     public class HidDevice : IHidDevice
     {
-        public bool DeviceConnected { get; set; }
-        public InterfaceDetails ProductInfo;
-        public byte[] ReadData;
         public event DataReceivedEvent DataReceived;
         public delegate void DataReceivedEvent(byte[] message);
 
-        private const int DIGCF_PRESENT = 0x2;
-        private const int DIGCF_DEVICEINTERFACE = 0x10;
-        private const uint GENERIC_READ = 0x80000000;
-        private const uint GENERIC_WRITE = 0x40000000;
-        private const uint FILE_SHARE_READ = 0x00000001;
-        private const uint FILE_SHARE_WRITE = 0x00000002;
-        private const uint OPEN_EXISTING = 3;
+        private const int DigcfPresent = 0x2;
+        private const int DigcfDeviceinterface = 0x10;
+        private const uint GenericRead = 0x80000000;
+        private const uint GenericWrite = 0x40000000;
+        private const uint FileShareRead = 0x00000001;
+        private const uint FileShareWrite = 0x00000002;
+        private const uint OpenExisting = 3;
 
-        private SafeFileHandle _handle_read;
-        private SafeFileHandle _handle_write;
-        private FileStream _fs_read;
-        private FileStream _fs_write;
+        private SafeFileHandle _handleRead;
+        private SafeFileHandle _handleWrite;
+        private FileStream _fsRead;
         private HIDP_CAPS _capabilities;
-        private bool _useAsyncReads;
+        private InterfaceDetails _productInfo;
+
+        public InterfaceDetails ProductInfo => _productInfo;
+        public byte[] ReadData { get; set; }
+        public bool DeviceConnected { get; set; }
+        private string DevicePath { get; set; }
+
+        private FileStream WriteStream
+        {
+            get
+            {
+                _handleWrite = CreateFile
+                (
+                    DevicePath, GenericRead | GenericWrite,
+                    FileShareRead | FileShareWrite,
+                    IntPtr.Zero,
+                    OpenExisting,
+                    0,
+                    IntPtr.Zero
+                );
+
+                return new FileStream(_handleWrite, FileAccess.ReadWrite, _capabilities.InputReportByteLength, false);
+            }
+        }
 
         public HidDevice(string devicePath, bool useAsyncReads)
         {
@@ -42,61 +61,53 @@ namespace DuckyOne2Engine.HidDevices
         private void SetupDevice(string devicePath, bool useAsyncReads)
         {
             DeviceConnected = false;
+            DevicePath = devicePath;
 
-            _handle_read = CreateFile
+            _handleRead = CreateFile
             (
-                devicePath, GENERIC_READ | GENERIC_WRITE,
-                FILE_SHARE_READ | FILE_SHARE_WRITE,
+                devicePath, GenericRead | GenericWrite,
+                FileShareRead | FileShareWrite,
                 IntPtr.Zero,
-                OPEN_EXISTING,
+                OpenExisting,
                 0,
                 IntPtr.Zero
             );
 
-            _handle_write = CreateFile
-            (
-                devicePath, GENERIC_READ | GENERIC_WRITE,
-                FILE_SHARE_READ | FILE_SHARE_WRITE,
-                IntPtr.Zero,
-                OPEN_EXISTING,
-                0,
-                IntPtr.Zero
-            );
-            
             var ptrToPreParsedData = new IntPtr();
             _capabilities = new HIDP_CAPS();
             var attributes = new HIDD_ATTRIBUTES();
-            HidD_GetPreparsedData(_handle_read, ref ptrToPreParsedData);
+            HidD_GetPreparsedData(_handleRead, ref ptrToPreParsedData);
             HidP_GetCaps(ptrToPreParsedData, ref _capabilities);
-            HidD_GetAttributes(_handle_read, ref attributes);
+            HidD_GetAttributes(_handleRead, ref attributes);
 
             string productName = "";
             string manfString = "";
             IntPtr buffer = Marshal.AllocHGlobal(126);//max alloc for string; 
-            if (HidD_GetProductString(_handle_read, buffer, 126)) productName = Marshal.PtrToStringAuto(buffer);
-            if (HidD_GetManufacturerString(_handle_read, buffer, 126)) manfString = Marshal.PtrToStringAuto(buffer);
+            if (HidD_GetProductString(_handleRead, buffer, 126)) productName = Marshal.PtrToStringAuto(buffer);
+            if (HidD_GetManufacturerString(_handleRead, buffer, 126)) manfString = Marshal.PtrToStringAuto(buffer);
             Marshal.FreeHGlobal(buffer);
             HidD_FreePreparsedData(ref ptrToPreParsedData);
 
-            if (_handle_read.IsInvalid)
+            if (_handleRead.IsInvalid)
             {
                 return;
             }
 
             DeviceConnected = true;
-            ProductInfo = new InterfaceDetails();
-            ProductInfo.DevicePath = devicePath;
-            ProductInfo.Manufacturer = manfString;
-            ProductInfo.Product = productName;
-            ProductInfo.Pid = (ushort)attributes.ProductID;
-            ProductInfo.Vid = (ushort)attributes.VendorID;
-            ProductInfo.VersionNumber = (ushort)attributes.VersionNumber;
-            ProductInfo.InReportByteLength = _capabilities.InputReportByteLength;
-            ProductInfo.OutReportByteLength = _capabilities.OutputReportByteLength;
 
-            _fs_read = new FileStream(_handle_read, FileAccess.ReadWrite, _capabilities.OutputReportByteLength, false);
-            _fs_write = new FileStream(_handle_write, FileAccess.ReadWrite, _capabilities.InputReportByteLength, false);
-            _useAsyncReads = useAsyncReads;
+            _productInfo = new InterfaceDetails
+            {
+                DevicePath = devicePath,
+                Manufacturer = manfString,
+                Product = productName,
+                Pid = (ushort) attributes.ProductID,
+                Vid = (ushort) attributes.VendorID,
+                VersionNumber = (ushort) attributes.VersionNumber,
+                InReportByteLength = _capabilities.InputReportByteLength,
+                OutReportByteLength = _capabilities.OutputReportByteLength
+            };
+
+            _fsRead = new FileStream(_handleRead, FileAccess.ReadWrite, _capabilities.OutputReportByteLength, false);
 
             if (useAsyncReads)
             {
@@ -113,7 +124,7 @@ namespace DuckyOne2Engine.HidDevices
             devInfo.cbSize = (uint)Marshal.SizeOf(devInfo);
             devIface.cbSize = (uint)Marshal.SizeOf(devIface);
             HidD_GetHidGuid(ref guid);
-            IntPtr i = SetupDiGetClassDevs(ref guid, IntPtr.Zero, IntPtr.Zero, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT);
+            IntPtr i = SetupDiGetClassDevs(ref guid, IntPtr.Zero, IntPtr.Zero, DigcfDeviceinterface | DigcfPresent);
             var didd = new SP_DEVICE_INTERFACE_DETAIL_DATA();
             didd.cbSize = IntPtr.Size == 8 ? 8 : 4 + Marshal.SystemDefaultCharSize;
 
@@ -138,10 +149,10 @@ namespace DuckyOne2Engine.HidDevices
                 tempHandle = CreateFile
                 (
                     devicePath,
-                    GENERIC_READ | GENERIC_WRITE,
-                    FILE_SHARE_READ | FILE_SHARE_WRITE,
+                    GenericRead | GenericWrite,
+                    FileShareRead | FileShareWrite,
                     IntPtr.Zero,
-                    OPEN_EXISTING,
+                    OpenExisting,
                     0,
                     IntPtr.Zero
                 );
@@ -210,9 +221,9 @@ namespace DuckyOne2Engine.HidDevices
         {
             ReadData = new byte[_capabilities.InputReportByteLength];
 
-            if (_fs_read.CanRead)
+            if (_fsRead.CanRead)
             {
-                _fs_read.BeginRead(ReadData, 0, ReadData.Length, GetInputReportData, ReadData);
+                _fsRead.BeginRead(ReadData, 0, ReadData.Length, GetInputReportData, ReadData);
             }
             else
             {
@@ -222,11 +233,11 @@ namespace DuckyOne2Engine.HidDevices
 
         private void GetInputReportData(IAsyncResult ar)
         {
-            _fs_read.EndRead(ar);
+            _fsRead.EndRead(ar);
 
-            if (_fs_read.CanRead)
+            if (_fsRead.CanRead)
             {
-                _fs_read.BeginRead(ReadData, 0, ReadData.Length, GetInputReportData, ReadData);
+                _fsRead.BeginRead(ReadData, 0, ReadData.Length, GetInputReportData, ReadData);
             }
             else
             {
@@ -245,9 +256,9 @@ namespace DuckyOne2Engine.HidDevices
 
             try
             {
-                if (_fs_write.CanWrite)
+                using (var stream = WriteStream)
                 {
-                    _fs_write.Write(data, 0, data.Length);
+                    stream.Write(data, 0, data.Length);
 
                     return true;
                 }
@@ -256,30 +267,23 @@ namespace DuckyOne2Engine.HidDevices
             {
                 throw new Exception($"File stream unable to write. Error: {e}");
             }
-
-            return false;
         }
 
         public void Close()
         {
-            if (_fs_read != null)
+            if (_fsRead != null)
             {
-                _fs_read.Close();
+                _fsRead.Close();
             }
 
-            if (_fs_write != null)
+            if (_handleRead != null && !_handleRead.IsInvalid)
             {
-                _fs_write.Close();
+                _handleRead.Close();
             }
 
-            if (_handle_read != null && !_handle_read.IsInvalid)
+            if (_handleWrite != null && !_handleWrite.IsInvalid)
             {
-                _handle_read.Close();
-            }
-
-            if (_handle_write != null && !_handle_write.IsInvalid)
-            {
-                _handle_write.Close();
+                _handleWrite.Close();
             }
 
             DeviceConnected = false;
@@ -384,7 +388,7 @@ namespace DuckyOne2Engine.HidDevices
             public UInt16 OutputReportByteLength;
             public UInt16 FeatureReportByteLength;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 17)]
-            public UInt16[] Reserved;			
+            public UInt16[] Reserved;
             public UInt16 NumberLinkCollectionNodes;
             public UInt16 NumberInputButtonCaps;
             public UInt16 NumberInputValueCaps;
