@@ -22,6 +22,7 @@ namespace DuckyOne2Engine.HidDevices
         private SafeFileHandle _handleRead;
         private SafeFileHandle _handleWrite;
         private FileStream _fsRead;
+        private FileStream _fsWrite;
         private HIDP_CAPS _capabilities;
         private InterfaceDetails _productInfo;
 
@@ -108,6 +109,7 @@ namespace DuckyOne2Engine.HidDevices
             };
 
             _fsRead = new FileStream(_handleRead, FileAccess.ReadWrite, _capabilities.OutputReportByteLength, false);
+            _fsWrite = WriteStream;
 
             if (useAsyncReads)
             {
@@ -256,12 +258,9 @@ namespace DuckyOne2Engine.HidDevices
 
             try
             {
-                using (var stream = WriteStream)
-                {
-                    stream.Write(data, 0, data.Length);
+                _fsWrite.Write(data, 0, data.Length);
 
-                    return true;
-                }
+                return true;
             }
             catch (Exception e)
             {
@@ -274,6 +273,11 @@ namespace DuckyOne2Engine.HidDevices
             if (_fsRead != null)
             {
                 _fsRead.Close();
+            }
+
+            if (_fsWrite != null)
+            {
+                _fsWrite.Close();
             }
 
             if (_handleRead != null && !_handleRead.IsInvalid)
