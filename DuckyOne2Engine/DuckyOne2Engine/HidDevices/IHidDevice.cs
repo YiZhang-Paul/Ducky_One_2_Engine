@@ -1,9 +1,11 @@
-﻿namespace DuckyOne2Engine.HidDevices
+﻿using System;
+
+namespace DuckyOne2Engine.HidDevices
 {
-    public interface IHidDevice
+    public interface IHidDevice : IDisposable
     {
         bool DeviceConnected { get; set; }
-        void Write(byte[] data);
+        bool Write(byte[] data);
         void Close();
     }
 }

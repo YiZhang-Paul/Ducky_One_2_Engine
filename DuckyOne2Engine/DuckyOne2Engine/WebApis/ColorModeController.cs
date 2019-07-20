@@ -37,15 +37,14 @@ namespace DuckyOne2Engine.WebApis
         [Route("progress")]
         public void PostProgressMode([FromBody]ProgressModeDto meta)
         {
-            if (!IsValidRgb(meta.BackRgb) || !IsValidRgb(meta.InnerRgb) || !IsValidRgb(meta.OuterRgb))
+            if (!IsValidRgb(meta.BackRgb) || !IsValidRgb(meta.ProgressRgb))
             {
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
             }
 
             var back = ParseRgb(meta.BackRgb);
-            var inner = ParseRgb(meta.InnerRgb);
-            var outer = ParseRgb(meta.OuterRgb);
-            Device.Use(new ProgressMode(back, inner, outer, meta.Speed));
+            var progress = ParseRgb(meta.ProgressRgb);
+            Device.Use(new ProgressMode(back, progress, meta.Speed));
         }
 
         [Route("wave")]

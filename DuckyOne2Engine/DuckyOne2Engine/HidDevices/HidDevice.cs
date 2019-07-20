@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace DuckyOne2Engine.HidDevices
 {
-    public class HidDevice : IHidDevice, IDisposable
+    public class HidDevice : IHidDevice
     {
         public bool DeviceConnected { get; set; }
         public InterfaceDetails ProductInfo;
@@ -236,21 +236,28 @@ namespace DuckyOne2Engine.HidDevices
             DataReceived(ReadData);
         }
 
-        public void Write(byte[] data)
+        public bool Write(byte[] data)
         {
             if (data.Length > _capabilities.OutputReportByteLength)
             {
                 throw new Exception($"Output report must not exceed {_capabilities.OutputReportByteLength - 1} bytes.");
             }
 
-            if (_fs_write.CanWrite)
+            try
             {
-                _fs_write.Write(data, 0, data.Length);
+                if (_fs_write.CanWrite)
+                {
+                    _fs_write.Write(data, 0, data.Length);
+
+                    return true;
+                }
             }
-            else
+            catch (Exception e)
             {
-                throw new Exception("File stream unable to write.");
+                throw new Exception($"File stream unable to write. Error: {e}");
             }
+
+            return false;
         }
 
         public void Close()

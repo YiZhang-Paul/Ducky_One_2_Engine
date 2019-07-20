@@ -1,5 +1,6 @@
 ﻿using DuckyOne2Engine.ColorControls;
 using DuckyOne2Engine.KeyMappers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -10,7 +11,6 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
     public class ProgressMode : IColorMode
     {
         private readonly int _totalActivePrimary = 18;
-        private readonly int _totalActiveSecondary = 26;
 
         private readonly string[] _primaryKeys =
         {
@@ -33,22 +33,34 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             Keys.Fn, Keys.Rwindow, Keys.Ralt, Keys.Space, Keys.Lalt, Keys.Lwindow
         };
 
+        private readonly Tuple<byte[], byte[]>[] _secondaryRgbs =
+        {
+            new Tuple<byte[], byte[]>(new byte[] { 0, 0, 85 }, new byte[] { 0, 0, 255 }), 
+            new Tuple<byte[], byte[]>(new byte[] { 0, 85, 85 }, new byte[] { 0, 255, 255 }), 
+            new Tuple<byte[], byte[]>(new byte[] { 22, 35, 75 }, new byte[] { 65, 105, 225 }), 
+            new Tuple<byte[], byte[]>(new byte[] { 0, 85, 0 }, new byte[] { 0, 255, 0 }), 
+            new Tuple<byte[], byte[]>(new byte[] { 85, 0, 85 }, new byte[] { 255, 0, 255 }),
+            new Tuple<byte[], byte[]>(new byte[] { 85, 0, 0 }, new byte[] { 255, 0, 0 }), 
+            new Tuple<byte[], byte[]>(new byte[] { 85, 23, 0 }, new byte[] { 255, 69, 0 }),
+            new Tuple<byte[], byte[]>(new byte[] { 85, 54, 41 }, new byte[] { 255, 160, 122 }),
+            new Tuple<byte[], byte[]>(new byte[] { 68, 68, 0 }, new byte[] { 204, 204, 0 })
+        };
+
         private int Speed { get; }
+        private int CurrentStep { get; set; }
+        private int SecondaryRgbPointer { get; set; }
         private List<int> ActivePrimary { get; set; }
-        private List<int> ActiveSecondary { get; set; }
+        private List<byte[]> SecondaryRgbs { get; set; }
         private bool IsProgressing { get; set; } = true;
         private byte[] BackRgb { get; }
-        private byte[] PrimaryRgb { get; }
-        private byte[] SecondaryRgb { get; }
+        private byte[] ProgressRgb { get; }
 
-        public ProgressMode(byte[] backRgb, byte[] primaryRgb, byte[] secondaryRgb, int speed = 25)
+        public ProgressMode(byte[] backRgb, byte[] progressRgb, int speed = 25)
         {
             BackRgb = backRgb;
-            PrimaryRgb = primaryRgb;
-            SecondaryRgb = secondaryRgb;
+            ProgressRgb = progressRgb;
             Speed = speed;
             ActivePrimary = GetIndexes(0, _totalActivePrimary, _primaryKeys.Length - 1);
-            ActiveSecondary = GetIndexes(0, _totalActiveSecondary, _secondaryKeys.Length - 1);
         }
 
         public void Setup(IColorControl colorControl)
@@ -69,14 +81,55 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             {
                 Thread.Sleep(Speed);
                 colorControl.SetAll(BackRgb);
-                var start = ActivePrimary[0] > _primaryKeys.Length - 2 ? 0 : ActivePrimary[0] + 1;
-                ActivePrimary = GetIndexes(start, _totalActivePrimary, _primaryKeys.Length - 1);
-                colorControl.SetColors(ActivePrimary.Select(_ => _primaryKeys[_]), PrimaryRgb);
-                start = ActiveSecondary[0] > _secondaryKeys.Length - 2 ? 0 : ActiveSecondary[0] + 1;
-                ActiveSecondary = GetIndexes(start, _totalActiveSecondary, _secondaryKeys.Length - 1);
-                colorControl.SetColors(ActiveSecondary.Select(_ => _secondaryKeys[_]), SecondaryRgb);
+                SetPrimaryColors(colorControl);
+                SetSecondaryColors(colorControl);
                 colorControl.ApplyColors();
             }
+        }
+
+        private void SetPrimaryColors(IColorControl colorControl)
+        {
+            var start = ActivePrimary[0] > _primaryKeys.Length - 2 ? 0 : ActivePrimary[0] + 1;
+            ActivePrimary = GetIndexes(start, _totalActivePrimary, _primaryKeys.Length - 1);
+            colorControl.SetColors(ActivePrimary.Select(_ => _primaryKeys[_]), ProgressRgb);
+        }
+
+        private void SetSecondaryColors(IColorControl colorControl)
+        {
+            SecondaryRgbs = SecondaryRgbs ?? GetSecondaryColors();
+            SecondaryRgbs = SecondaryRgbs.Skip(1).Concat(SecondaryRgbs.Take(1)).ToList();
+
+            for (int i = 0; i < _secondaryKeys.Length; ++i)
+            {
+                colorControl.SetColor(new KeyColor(_secondaryKeys[i], SecondaryRgbs[i]));
+            }
+
+            if (++CurrentStep == 10)
+            {
+                CurrentStep = 0;
+                SecondaryRgbs = GetSecondaryColors();
+            }
+        }
+
+        private List<byte[]> GetSecondaryColors()
+        {
+            var random = new Random();
+            SecondaryRgbPointer = SecondaryRgbPointer > _secondaryRgbs.Length - 2 ? 0 : ++SecondaryRgbPointer;
+            var colorPair = _secondaryRgbs[SecondaryRgbPointer];
+            var colors = Enumerable.Repeat(colorPair.Item1, _secondaryKeys.Length).ToList();
+
+            for (int i = 0; i < 4; ++i)
+            {
+                var start = i * 8 + random.Next(3);
+                var end = start + Math.Max(3, random.Next(4));
+
+                for (int j = start; j <= end; ++j)
+                {
+                    colors[j] = colorPair.Item2;
+                }
+            }
+
+            return colors;
         }
 
         private List<int> GetIndexes(int start, int total, int maxIndex)
