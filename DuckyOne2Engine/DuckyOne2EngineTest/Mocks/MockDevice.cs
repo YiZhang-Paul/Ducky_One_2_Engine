@@ -11,7 +11,7 @@ namespace DuckyOne2EngineTest.Mocks
         {
             var builder = new StringBuilder();
 
-            device.Setup(x => x.Write(It.IsAny<byte[]>()))
+            device.Setup(x => x.Write(It.IsAny<byte[]>(), It.IsAny<int>()))
                 .Callback((byte[] input) =>
                 {
                     var hex = input.Select(_ => _.ToString("X2"));

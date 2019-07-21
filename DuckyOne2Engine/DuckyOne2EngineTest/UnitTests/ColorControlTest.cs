@@ -58,7 +58,7 @@ namespace DuckyOne2EngineTest.UnitTests
         {
             _control.SetColor(_colors[0]);
 
-            _device.Verify(x => x.Write(It.IsAny<byte[]>()), Times.Never);
+            _device.Verify(x => x.Write(It.IsAny<byte[]>(), It.IsAny<int>()), Times.Never);
         }
 
         [TestMethod]
@@ -92,7 +92,7 @@ namespace DuckyOne2EngineTest.UnitTests
         {
             _control.SetColors(_colors);
 
-            _device.Verify(x => x.Write(It.IsAny<byte[]>()), Times.Never);
+            _device.Verify(x => x.Write(It.IsAny<byte[]>(), It.IsAny<int>()), Times.Never);
         }
 
         [TestMethod]
@@ -129,7 +129,7 @@ namespace DuckyOne2EngineTest.UnitTests
         {
             _control.ApplyColors();
 
-            _device.Verify(x => x.Write(It.IsAny<byte[]>()), Times.Exactly(9));
+            _device.Verify(x => x.Write(It.IsAny<byte[]>(), It.IsAny<int>()), Times.Exactly(9));
         }
 
         [TestMethod]

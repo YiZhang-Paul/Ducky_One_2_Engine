@@ -3,6 +3,7 @@ using Microsoft.Win32.SafeHandles;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace DuckyOne2Engine.HidDevices
 {
@@ -30,6 +31,7 @@ namespace DuckyOne2Engine.HidDevices
         public byte[] ReadData { get; set; }
         public bool DeviceConnected { get; set; }
         private string DevicePath { get; set; }
+        private ManualResetEventSlim WaitEvent { get; } = new ManualResetEventSlim();
 
         private FileStream WriteStream
         {
@@ -37,7 +39,8 @@ namespace DuckyOne2Engine.HidDevices
             {
                 _handleWrite = CreateFile
                 (
-                    DevicePath, GenericRead | GenericWrite,
+                    DevicePath,
+                    GenericRead | GenericWrite,
                     FileShareRead | FileShareWrite,
                     IntPtr.Zero,
                     OpenExisting,
@@ -66,7 +69,8 @@ namespace DuckyOne2Engine.HidDevices
 
             _handleRead = CreateFile
             (
-                devicePath, GenericRead | GenericWrite,
+                devicePath,
+                GenericRead | GenericWrite,
                 FileShareRead | FileShareWrite,
                 IntPtr.Zero,
                 OpenExisting,
@@ -249,7 +253,7 @@ namespace DuckyOne2Engine.HidDevices
             DataReceived(ReadData);
         }
 
-        public bool Write(byte[] data)
+        public bool Write(byte[] data, int timeout = 200)
         {
             if (data.Length > _capabilities.OutputReportByteLength)
             {
@@ -258,7 +262,16 @@ namespace DuckyOne2Engine.HidDevices
 
             try
             {
-                _fsWrite.Write(data, 0, data.Length);
+                WaitEvent.Reset();
+
+                _fsWrite.BeginWrite(data, 0, data.Length, result =>
+                {
+                    _fsWrite.EndWrite(result);
+                    WaitEvent.Set();
+
+                }, null);
+
+                WaitEvent.Wait(timeout);
 
                 return true;
             }
@@ -273,21 +286,25 @@ namespace DuckyOne2Engine.HidDevices
             if (_fsRead != null)
             {
                 _fsRead.Close();
+                _fsRead = null;
             }
 
             if (_fsWrite != null)
             {
                 _fsWrite.Close();
+                _fsWrite = null;
             }
 
             if (_handleRead != null && !_handleRead.IsInvalid)
             {
                 _handleRead.Close();
+                _handleRead = null;
             }
 
             if (_handleWrite != null && !_handleWrite.IsInvalid)
             {
                 _handleWrite.Close();
+                _handleWrite = null;
             }
 
             DeviceConnected = false;
