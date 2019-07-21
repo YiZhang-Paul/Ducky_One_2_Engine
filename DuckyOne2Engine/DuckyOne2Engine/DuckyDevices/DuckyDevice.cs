@@ -1,9 +1,7 @@
 ﻿using DuckyOne2Engine.ColorControls;
 using DuckyOne2Engine.DuckyDevices.ColorModes;
 using DuckyOne2Engine.HidDevices;
-using Gma.System.MouseKeyHook;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -16,11 +14,10 @@ namespace DuckyOne2Engine.DuckyDevices
         private IColorControl ColorControl { get; }
         private IColorMode ColorMode { get; set; }
 
-        public DuckyDevice(IHidDevice device, IColorControl colorControl, Action onExit)
+        public DuckyDevice(IHidDevice device, IColorControl colorControl)
         {
             Device = device;
             ColorControl = colorControl;
-            Setup(onExit);
             Open();
             Thread.Sleep(1500);
         }
@@ -33,14 +30,6 @@ namespace DuckyOne2Engine.DuckyDevices
             ColorMode.Setup(ColorControl);
 
             return this;
-        }
-
-        private void Setup(Action onExit)
-        {
-            Cache.GlobalKeyboardEvents.OnCombination(new Dictionary<Combination, Action>
-            {
-                { Combination.FromString("Control+Shift+M"), onExit }
-            });
         }
 
         public void Open()
