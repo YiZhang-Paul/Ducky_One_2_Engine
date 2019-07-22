@@ -33,15 +33,15 @@ namespace DuckyOne2Engine
             using (WebApp.Start(host))
             {
                 Console.WriteLine($"Server started listening on: {host}");
-                Cache.ActiveDuckyDevice = new DuckyDevice(device, controller);
-                Cache.ActiveDuckyDevice.Use(new ReactiveMode(new byte[] { 0, 85, 85 }, new byte[] { 255, 255, 255 }, 15));
                 Cache.GlobalKeyboardEvents = Hook.GlobalEvents();
+                Cache.ActiveDuckyDevice = new DuckyDevice(device, controller);
+                Cache.ActiveDuckyDevice.Use(new ReactiveMode(new byte[] { 0, 175, 175 }, new byte[] { 255, 255, 255 }, 15));
 
                 Cache.GlobalKeyboardEvents.OnCombination(new Dictionary<Combination, Action>
                 {
                     { Combination.FromString("Control+Shift+M"), Exit }
                 });
-                
+
                 Application.Run(new ApplicationContext());
             }
         }
