@@ -25,9 +25,7 @@ namespace DuckyOne2Engine.HidDevices
         private FileStream _fsRead;
         private FileStream _fsWrite;
         private HIDP_CAPS _capabilities;
-        private InterfaceDetails _productInfo;
 
-        public InterfaceDetails ProductInfo => _productInfo;
         public byte[] ReadData { get; set; }
         public bool DeviceConnected { get; set; }
         private string DevicePath { get; set; }
@@ -84,12 +82,7 @@ namespace DuckyOne2Engine.HidDevices
             HidD_GetPreparsedData(_handleRead, ref ptrToPreParsedData);
             HidP_GetCaps(ptrToPreParsedData, ref _capabilities);
             HidD_GetAttributes(_handleRead, ref attributes);
-
-            string productName = "";
-            string manfString = "";
-            IntPtr buffer = Marshal.AllocHGlobal(126);//max alloc for string; 
-            if (HidD_GetProductString(_handleRead, buffer, 126)) productName = Marshal.PtrToStringAuto(buffer);
-            if (HidD_GetManufacturerString(_handleRead, buffer, 126)) manfString = Marshal.PtrToStringAuto(buffer);
+            IntPtr buffer = Marshal.AllocHGlobal(126);
             Marshal.FreeHGlobal(buffer);
             HidD_FreePreparsedData(ref ptrToPreParsedData);
 
@@ -98,22 +91,9 @@ namespace DuckyOne2Engine.HidDevices
                 return;
             }
 
-            DeviceConnected = true;
-
-            _productInfo = new InterfaceDetails
-            {
-                DevicePath = devicePath,
-                Manufacturer = manfString,
-                Product = productName,
-                Pid = (ushort) attributes.ProductID,
-                Vid = (ushort) attributes.VendorID,
-                VersionNumber = (ushort) attributes.VersionNumber,
-                InReportByteLength = _capabilities.InputReportByteLength,
-                OutReportByteLength = _capabilities.OutputReportByteLength
-            };
-
             _fsRead = new FileStream(_handleRead, FileAccess.ReadWrite, _capabilities.OutputReportByteLength, false);
             _fsWrite = WriteStream;
+            DeviceConnected = true;
 
             if (useAsyncReads)
             {
@@ -283,28 +263,17 @@ namespace DuckyOne2Engine.HidDevices
 
         public void Close()
         {
-            if (_fsRead != null)
-            {
-                _fsRead.Close();
-                _fsRead = null;
-            }
-
-            if (_fsWrite != null)
-            {
-                _fsWrite.Close();
-                _fsWrite = null;
-            }
+            _fsRead?.Close();
+            _fsWrite?.Close();
 
             if (_handleRead != null && !_handleRead.IsInvalid)
             {
                 _handleRead.Close();
-                _handleRead = null;
             }
 
             if (_handleWrite != null && !_handleWrite.IsInvalid)
             {
                 _handleWrite.Close();
-                _handleWrite = null;
             }
 
             DeviceConnected = false;
