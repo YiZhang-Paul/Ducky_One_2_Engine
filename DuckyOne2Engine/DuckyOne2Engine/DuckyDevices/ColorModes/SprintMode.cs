@@ -24,9 +24,9 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             new[] { Keys.Hyphen, Keys.Lbracket, Keys.Quote, Keys.Question }
         };
 
-        private const int BreathSteps = 30;
-        private const int DropSteps = 45;
-        private const int MaxDrops = 35;
+        private const int BreathSteps = 20;
+        private const int DropSteps = 30;
+        private const int MaxDrops = 45;
 
         private int CurrentBreathStep { get; set; }
         private int Position { get; set; }

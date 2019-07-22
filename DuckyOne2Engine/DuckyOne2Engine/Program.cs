@@ -63,11 +63,11 @@ namespace DuckyOne2Engine
                 switch (counter)
                 {
                     case 0:
-                        Cache.ActiveDuckyDevice.Use(new ProgressMode(new byte[] { 255, 0, 255 }, new byte[] { 0, 255, 225 }));
+                        Cache.ActiveDuckyDevice.Use(new ProgressMode(new byte[] { 255, 0, 255 }, new byte[] { 0, 255, 225 }, 70));
                         Thread.Sleep(1620000);
                         break;
                     case 1:
-                        Cache.ActiveDuckyDevice.Use(new SprintMode(new byte[] { 149, 0, 149 }, new byte[] { 229, 0, 229 }, new byte[] { 0, 0, 255 }, 45));
+                        Cache.ActiveDuckyDevice.Use(new SprintMode(new byte[] { 149, 0, 149 }, new byte[] { 229, 0, 229 }, new byte[] { 0, 0, 255 }, 75));
                         Thread.Sleep(1620000);
                         break;
                     case 2:
@@ -79,7 +79,7 @@ namespace DuckyOne2Engine
                         Thread.Sleep(120000);
                         break;
                     case 4:
-                        Cache.ActiveDuckyDevice.Use(new ReactiveMode(new byte[] { 0, 85, 85 }, new byte[] { 255, 255, 255 }));
+                        Cache.ActiveDuckyDevice.Use(new ReactiveMode(new byte[] { 0, 85, 85 }, new byte[] { 255, 255, 255 }, 15));
                         Thread.Sleep(120000);
                         break;
                 }

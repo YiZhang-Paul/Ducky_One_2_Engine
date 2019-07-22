@@ -85,7 +85,7 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
 
         private void SetStageOneColors(IColorControl colorControl)
         {
-            Thread.Sleep(70);
+            Thread.Sleep(100);
 
             if (Step == _rings.Length * 2)
             {
@@ -105,7 +105,7 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
 
         private void SetStageTwoColors(IColorControl colorControl)
         {
-            Thread.Sleep(300);
+            Thread.Sleep(320);
 
             if (Step == 0 || Step == 3 || Step == 5)
             {
@@ -113,7 +113,7 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
             }
 
             colorControl.SetColors(_rings[Step % _rings.Length], WaveRgb);
-            
+
             if (Step > 2 && Step < 5)
             {
                 colorControl.SetColors(_rings.Last(), WaveRgb);
@@ -132,7 +132,7 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
 
         private void SetStageThreeColors(IColorControl colorControl)
         {
-            Thread.Sleep(10);
+            Thread.Sleep(20);
 
             for (int i = 0; i < Step; ++i)
             {

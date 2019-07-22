@@ -70,7 +70,7 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
         {
             while (IsActive)
             {
-                Thread.Sleep(15);
+                Thread.Sleep(30);
 
                 lock (_keysLock)
                 {
