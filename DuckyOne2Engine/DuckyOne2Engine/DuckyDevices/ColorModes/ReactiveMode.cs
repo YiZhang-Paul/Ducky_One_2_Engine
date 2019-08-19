@@ -16,6 +16,7 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
         private bool IsActive { get; set; } = true;
         private byte[] BackRgb { get; }
         private byte[] ActiveRgb { get; }
+        private byte[] MinActiveRgb { get; }
         private IColorControl ColorControl { get; set; }
         private Dictionary<string, int> KeyPressed { get; } = new Dictionary<string, int>();
 
@@ -23,6 +24,7 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
         {
             BackRgb = backRgb;
             ActiveRgb = activeRgb;
+            MinActiveRgb = BackRgb.Select(_ => Math.Min(_, (byte)150)).ToArray();
             Steps = steps;
         }
 
@@ -99,11 +101,11 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
                 return (byte)Math.Max(min, value - (Steps - step) * delta);
             }
 
-            var r = NextValue(BackRgb[0], ActiveRgb[0]);
-            var g = NextValue(BackRgb[1], ActiveRgb[1]);
-            var b = NextValue(BackRgb[2], ActiveRgb[2]);
+            var r = NextValue(MinActiveRgb[0], ActiveRgb[0]);
+            var g = NextValue(MinActiveRgb[1], ActiveRgb[1]);
+            var b = NextValue(MinActiveRgb[2], ActiveRgb[2]);
 
-            if (r <= BackRgb[0] && g <= BackRgb[1] && b <= BackRgb[2])
+            if (r <= MinActiveRgb[0] && g <= MinActiveRgb[1] && b <= MinActiveRgb[2])
             {
                 return BackRgb;
             }
