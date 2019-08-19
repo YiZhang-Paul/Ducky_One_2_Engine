@@ -55,12 +55,17 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
         private byte[] BackRgb { get; }
         private byte[] ProgressRgb { get; }
 
-        public ProgressMode(byte[] backRgb, byte[] progressRgb, int speed = 25)
+        public ProgressMode(byte[] backRgb, byte[] progressRgb, byte[][] secondaryRgbs, int speed = 25)
         {
             BackRgb = backRgb;
             ProgressRgb = progressRgb;
             Speed = speed;
             ActivePrimary = GetIndexes(0, _totalActivePrimary, _primaryKeys.Length - 1);
+
+            if (secondaryRgbs.All(_ => _.Length == 3))
+            {
+                _secondaryRgbs = InitializeSecondaryRgbs(secondaryRgbs).ToArray();
+            }
         }
 
         public void Setup(IColorControl colorControl)
@@ -73,6 +78,16 @@ namespace DuckyOne2Engine.DuckyDevices.ColorModes
         public void Unload()
         {
             IsProgressing = false;
+        }
+
+        private IEnumerable<Tuple<byte[], byte[]>> InitializeSecondaryRgbs(byte[][] rgbs)
+        {
+            return rgbs.Select(_ =>
+            {
+                var dimColor = _.Select(value => (byte)(value / 3)).ToArray();
+
+                return new Tuple<byte[], byte[]>(dimColor, _);
+            });
         }
 
         private void Progress(IColorControl colorControl)
