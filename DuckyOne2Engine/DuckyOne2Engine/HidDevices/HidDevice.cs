@@ -174,12 +174,6 @@ namespace DuckyOne2Engine.HidDevices
                 productInfo.VersionNumber = (ushort)attributes.VersionNumber;
                 productInfo.InReportByteLength = capabilities.InputReportByteLength;
                 productInfo.OutReportByteLength = capabilities.OutputReportByteLength;
-
-                if (StringIsInteger(serialNumber))
-                {
-                    productInfo.SerialNumber = Convert.ToInt32(serialNumber);
-                }
-
                 int newSize = devices.Length + 1;
                 Array.Resize(ref devices, newSize);
                 devices[newSize - 1] = productInfo;
